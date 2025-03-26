@@ -17,5 +17,5 @@
     ".eslintrc.js",
     ".lintstagedrc.js"
   ],
-  "exclude": ["node_modules", "policies"]
+  "exclude": ["node_modules"]
 }
