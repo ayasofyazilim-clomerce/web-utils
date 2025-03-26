@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 import {createContext, useContext} from "react";
 import policies from "./policies.json";

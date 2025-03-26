@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use server";
 import {permanentRedirect, RedirectType} from "next/navigation";
 import {Policy} from "./types";
