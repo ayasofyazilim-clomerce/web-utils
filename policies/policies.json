@@ -373,6 +373,7 @@
   "FinanceService.VATStatementHeaders.Edit": false,
   "FinanceService.VATStatementHeaders.ViewList": false,
   "FinanceService.VATStatementHeaders.FormBulkPreview": false,
+  "FinanceService.VATStatementHeaders.ExportExcelFile": false,
   "FinanceService.VATStatementTagDetails": false,
   "FinanceService.VATStatementTagDetails.Create": false,
   "FinanceService.VATStatementTagDetails.Delete": false,
