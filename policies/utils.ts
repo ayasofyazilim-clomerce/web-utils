@@ -16,7 +16,7 @@ export async function isUnauthorized({
   const missingPolicies = requiredPolicies.filter((policy) => !grantedPolicies?.[policy]);
   if (missingPolicies.length > 0) {
     if (!redirect) {
-      return false;
+      return true;
     }
     return permanentRedirect(`/${lang}/unauthorized`, RedirectType.replace);
   }
