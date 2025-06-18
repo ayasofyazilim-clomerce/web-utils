@@ -7,12 +7,14 @@ export async function isUnauthorized({
   requiredPolicies,
   lang,
   redirect = true,
+  grantedPolicies: initalGrantedPolicies,
 }: {
   requiredPolicies: Policy[];
   lang: string;
   redirect?: boolean;
+  grantedPolicies?: Record<string, boolean> | null;
 }) {
-  const grantedPolicies = await getGrantedPoliciesApi();
+  const grantedPolicies = initalGrantedPolicies || (await getGrantedPoliciesApi());
   const missingPolicies = requiredPolicies.filter((policy) => !grantedPolicies?.[policy]);
   if (missingPolicies.length > 0) {
     if (!redirect) {
