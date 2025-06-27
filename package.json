@@ -6,7 +6,9 @@
     "./*": "./*/index.tsx",
     "./auth/next-auth": "./auth/auth.ts",
     "./auth/middleware": "./auth/middleware.ts",
-    "./helper-functions": "./helper-functions.ts"
+    "./helper-functions": "./helper-functions.ts",
+    "./tscanify": "./tscanify/index.ts",
+    "./tscanify/browser": "./tscanify/browser.ts"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -22,10 +24,14 @@
     "@types/react-dom": "18.3.5",
     "next": "14.2.29",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "canvas": "3.1.2",
+    "jsdom": "26.1.0",
+    "opencv-ts": "^1.3.6"
   },
   "devDependencies": {
-    "@types/negotiator": "0.6.3"
+    "@types/negotiator": "0.6.3",
+    "@types/jsdom": "^21.1.7"
   },
   "keywords": [],
   "author": "",
