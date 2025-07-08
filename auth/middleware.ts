@@ -59,9 +59,9 @@ function redirectToLocale(request: NextRequest, pathname: string) {
 }
 function redirectToLogin(request: NextRequest, pathname: string, locale: string) {
   const redirectTo = encodeURIComponent(pathname);
-
+  const loginRoute = process.env.LOGIN_ROUTE ? process.env.LOGIN_ROUTE : "login";
   const newUrl = request.nextUrl.clone();
-  newUrl.pathname = `/${locale}/login`;
+  newUrl.pathname = `/${locale}/${loginRoute}`;
   newUrl.searchParams.set("redirectTo", redirectTo);
   return NextResponse.redirect(newUrl);
 }
