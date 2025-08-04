@@ -23,7 +23,7 @@ export const handlePutResponse = (
 export const handlePostResponse = <T>(
   response: ServerResponse<T>,
   router?: AppRouterInstance,
-  redirectTo?: string | {prefix: string; identifier: keyof T; suffix?: string},
+  redirectTo?: string | {prefix: string; identifier?: keyof T; suffix?: string},
 ) => {
   if (response.type === "success") {
     toast.success("Created successfully");
@@ -32,7 +32,7 @@ export const handlePostResponse = <T>(
       router.push(redirectTo);
     } else if (redirectTo) {
       const {prefix, suffix, identifier} = redirectTo;
-      const id = (response.data[identifier] as string).toString();
+      const id = identifier ? (response.data[identifier] as string).toString() : response.data;
       router.push(suffix ? `${prefix}/${id}/${suffix}` : `${prefix}/${id}`);
     }
     router.refresh();
