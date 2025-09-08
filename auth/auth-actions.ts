@@ -19,13 +19,13 @@ export async function getAccountServiceClient(accessToken?: string) {
   });
 }
 
-export async function signOutServer() {
+export async function signOutServer({redirectTo = "/en/login"}: {redirectTo?: string}) {
   try {
     await signOut({redirect: false});
   } catch (error) {
     return {error: "Unknown error"};
   }
-  redirect("/en/login");
+  redirect(redirectTo);
 }
 async function fetchScopes() {
   const scopes = await fetch(OPENID_URL)
