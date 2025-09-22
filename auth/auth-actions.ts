@@ -1,8 +1,8 @@
 "use server";
 
-import {AccountServiceClient} from "@ayasofyazilim/core-saas/AccountService";
-import {redirect} from "next/navigation";
-import {signOut} from "./auth";
+import { AccountServiceClient } from "@ayasofyazilim/core-saas/AccountService";
+import { redirect } from "next/navigation";
+import { signOut } from "./auth";
 
 const TOKEN_URL = `${process.env.TOKEN_URL}/connect/token`;
 const OPENID_URL = `${process.env.TOKEN_URL}/.well-known/openid-configuration`;
@@ -19,11 +19,11 @@ export async function getAccountServiceClient(accessToken?: string) {
   });
 }
 
-export async function signOutServer({redirectTo = "/en/login"}: {redirectTo?: string} = {}) {
+export async function signOutServer({ redirectTo = "/en/login" }: { redirectTo?: string } = {}) {
   try {
-    await signOut({redirect: false});
+    await signOut({ redirect: false });
   } catch (error) {
-    return {error: "Unknown error"};
+    return { error: "Unknown error" };
   }
   redirect(redirectTo);
 }
@@ -31,7 +31,7 @@ export async function signOutServer({redirectTo = "/en/login"}: {redirectTo?: st
 async function fetchScopes() {
   const scopes = await fetch(OPENID_URL)
     .then((response) => response.json())
-    .then((json: {scopes_supported?: string[]}) => json.scopes_supported?.join(" ") || "");
+    .then((json: { scopes_supported?: string[] }) => json.scopes_supported?.join(" ") || "");
   return scopes;
 }
 type TokenResponse = {
@@ -85,7 +85,7 @@ export async function fetchNewAccessTokenByRefreshToken(refreshToken: string) {
     body: urlencoded,
   });
 
-  return await response.json();
+  return await response.json() as { access_token: string; refresh_token: string; expires_in: number };
 }
 
 export async function getUserData(access_token: string, refresh_token: string, expiration_date: number) {
