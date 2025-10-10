@@ -39,6 +39,9 @@ type TokenResponse = {
   refresh_token: string;
   expires_in: number;
   error_description?: string;
+  error?: {
+    message?: string;
+  }
 };
 export async function fetchToken<T extends TokenResponse>(credentials: {
   username: string;
