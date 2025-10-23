@@ -59,10 +59,11 @@ function redirectToLocale(request: NextRequest, pathname: string) {
   newUrl.pathname = `/${locale}${pathname}`;
   return NextResponse.redirect(newUrl);
 }
-function redirectToLogin(request: NextRequest, pathname: string, locale: string) {
-  const redirectTo = encodeURIComponent(pathname);
+function redirectToLogin(request: NextRequest, locale: string) {
+  const redirectTo = encodeURIComponent(request.nextUrl.pathname + request.nextUrl.search);
   const loginRoute = process.env.LOGIN_ROUTE ? process.env.LOGIN_ROUTE : "login";
   const newUrl = request.nextUrl.clone();
+  newUrl.search = "";
   newUrl.pathname = `/${locale}/${loginRoute}`;
   newUrl.searchParams.set("redirectTo", redirectTo);
   return NextResponse.redirect(newUrl);
@@ -101,7 +102,7 @@ export const middleware = auth((request: NextAuthRequest) => {
     ((!protectAllRoutes && protectedRoutes.some((route) => route === pathParts[1])) ||
       (protectAllRoutes && !unauthorizedRoutes.some((route) => route === pathParts[1])))
   ) {
-    return redirectToLogin(request, pathname, pathParts[0]);
+    return redirectToLogin(request, pathParts[0]);
   }
 
   // 4. Check if the user is trying to access a unauthorized route with authorization
