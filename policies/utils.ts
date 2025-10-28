@@ -1,8 +1,7 @@
-// @ts-nocheck
 "use server";
-import {permanentRedirect, RedirectType} from "next/navigation";
-import {Policy} from "./types";
-import {getGrantedPoliciesApi} from "../api/action";
+import { permanentRedirect, RedirectType } from "next/navigation";
+import { Policy } from "./types";
+import { getGrantedPoliciesApi } from "../api/action";
 export async function isUnauthorized({
   requiredPolicies,
   lang,
