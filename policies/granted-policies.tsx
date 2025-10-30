@@ -1,13 +1,12 @@
-// @ts-nocheck
 "use client";
-import {createContext, useContext} from "react";
+import { createContext, useContext } from "react";
 import policies from "./policies.json";
-import {Policy} from "./types";
+import { Policies } from "./types";
 
-import type {ReactNode} from "react";
+import type { ReactNode } from "react";
 const GrantedPoliciesContext = createContext<{
-  grantedPolicies: Record<Policy, boolean>;
-}>({grantedPolicies: policies});
+  grantedPolicies: Policies;
+}>({ grantedPolicies: policies });
 
 export const useGrantedPolicies = () => {
   return useContext(GrantedPoliciesContext);
@@ -18,10 +17,10 @@ export function GrantedPoliciesProvider({
   grantedPolicies = policies,
 }: {
   children: ReactNode;
-  grantedPolicies?: Record<string, boolean> | undefined;
+  grantedPolicies?: Policies | undefined;
 }) {
   return (
-    <GrantedPoliciesContext.Provider value={{grantedPolicies: grantedPolicies as Record<Policy, boolean>}}>
+    <GrantedPoliciesContext.Provider value={{ grantedPolicies: grantedPolicies as Policies }}>
       {children}
     </GrantedPoliciesContext.Provider>
   );

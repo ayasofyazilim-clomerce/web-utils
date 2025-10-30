@@ -92,7 +92,7 @@ export async function fetchNewAccessTokenByRefreshToken(refreshToken: string) {
 }
 
 export async function getUserData(access_token: string, refresh_token: string, expiration_date: number) {
-  const decoded_jwt = JSON.parse(Buffer.from(access_token.split(".")[1], "base64").toString());
+  const decoded_jwt = JSON.parse(Buffer.from(access_token.split(".")[1] || "", "base64").toString());
   return {
     access_token,
     refresh_token,
