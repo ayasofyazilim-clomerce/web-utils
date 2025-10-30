@@ -2,11 +2,12 @@ import Credentials from "next-auth/providers/credentials";
 export type Awaitable<T> = T | PromiseLike<T>;
 
 import { AdapterUser } from "@auth/core/adapters";
-import NextAuth, { AuthError } from "next-auth";
+import NextAuth, { AuthError, NextAuthResult } from "next-auth";
 import { fetchNewAccessTokenByRefreshToken, fetchToken, getUserData } from "./auth-actions";
 import { MyUser } from "./auth-types";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+
+const result = NextAuth({
   providers: [
     Credentials({
       credentials: {
@@ -90,3 +91,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 });
+
+export const handlers: NextAuthResult['handlers'] = result.handlers;
+export const auth: NextAuthResult['auth'] = result.auth;
+export const signIn: NextAuthResult['signIn'] = result.signIn;
+export const signOut: NextAuthResult['signOut'] = result.signOut;
