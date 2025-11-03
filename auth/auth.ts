@@ -3,18 +3,17 @@ export type Awaitable<T> = T | PromiseLike<T>;
 
 import { AdapterUser } from "@auth/core/adapters";
 import NextAuth, { AuthError, NextAuthResult } from "next-auth";
-import { fetchNewAccessTokenByRefreshToken, fetchToken, getUserData } from "./auth-actions";
+import {
+  fetchNewAccessTokenByRefreshToken,
+  fetchToken,
+  getUserData,
+} from "./auth-actions";
 import { MyUser } from "./auth-types";
-
 
 const result = NextAuth({
   providers: [
     Credentials({
-      credentials: {
-        username: {},
-        password: {},
-        tenantId: {},
-      },
+      credentials: { username: {}, password: {}, tenantId: {} },
       authorize: async (credentials) => {
         function authorizeError(message: string) {
           return Promise.reject(new AuthError(JSON.stringify(message)));
@@ -25,13 +24,24 @@ const result = NextAuth({
             password: credentials.password as string,
             tenantId: credentials.tenantId as string,
           });
-          if (signInResponse.error_description || (signInResponse.error && signInResponse.error.message)) {
-            return authorizeError(signInResponse?.error?.message || signInResponse.error_description || "");
+          if (
+            signInResponse.error_description ||
+            (signInResponse.error && signInResponse.error.message)
+          ) {
+            return authorizeError(
+              signInResponse?.error?.message ||
+                signInResponse.error_description ||
+                "",
+            );
           }
           const { access_token, refresh_token, expires_in } = signInResponse;
           const expiration_date = expires_in * 1000 + Date.now();
 
-          const user_data = await getUserData(access_token, refresh_token, expiration_date);
+          const user_data = await getUserData(
+            access_token,
+            refresh_token,
+            expiration_date,
+          );
           return user_data;
         } catch (error) {
           return authorizeError(JSON.stringify(error));
@@ -43,9 +53,7 @@ const result = NextAuth({
     signIn: process.env.AUTHJS_SIGNIN_PATH || "/",
     signOut: process.env.AUTHJS_SIGNOUT_PATH || "/",
   },
-  session: {
-    strategy: "jwt",
-  },
+  session: { strategy: "jwt" },
   callbacks: {
     signIn({ user }) {
       if (user.userName) {
@@ -57,9 +65,8 @@ const result = NextAuth({
       if (token?.user) {
         const user = token?.user as AdapterUser & MyUser;
         if (user.expiration_date < Date.now()) {
-          const { access_token, refresh_token, expires_in } = await fetchNewAccessTokenByRefreshToken(
-            user.refresh_token || "",
-          );
+          const { access_token, refresh_token, expires_in } =
+            await fetchNewAccessTokenByRefreshToken(user.refresh_token || "");
 
           if (access_token && refresh_token) {
             user.access_token = access_token;
@@ -81,10 +88,7 @@ const result = NextAuth({
       }
       if (trigger === "update") {
         if (session.info) {
-          token.user = {
-            ...(token.user as object),
-            ...session.info,
-          };
+          token.user = { ...(token.user as object), ...session.info };
         }
       }
       return token;
@@ -92,7 +96,7 @@ const result = NextAuth({
   },
 });
 
-export const handlers: NextAuthResult['handlers'] = result.handlers;
-export const auth: NextAuthResult['auth'] = result.auth;
-export const signIn: NextAuthResult['signIn'] = result.signIn;
-export const signOut: NextAuthResult['signOut'] = result.signOut;
+export const handlers: NextAuthResult["handlers"] = result.handlers;
+export const auth: NextAuthResult["auth"] = result.auth;
+export const signIn: NextAuthResult["signIn"] = result.signIn;
+export const signOut: NextAuthResult["signOut"] = result.signOut;

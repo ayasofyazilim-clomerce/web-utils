@@ -1,6 +1,6 @@
-import {ApiError} from "@ayasofyazilim/core-saas/AccountService";
-import {notFound, permanentRedirect, RedirectType} from "next/navigation";
-import {ApiErrorServerResponse, ServerResponse} from "./types";
+import { ApiError } from "@ayasofyazilim/core-saas/AccountService";
+import { notFound, permanentRedirect, RedirectType } from "next/navigation";
+import { ApiErrorServerResponse, ServerResponse } from "./types";
 
 export function isApiError(error: unknown): error is ApiError {
   if ((error as ApiError).name === "ApiError") {
@@ -8,7 +8,9 @@ export function isApiError(error: unknown): error is ApiError {
   }
   return error instanceof ApiError;
 }
-export function isThrowedError(error: unknown): error is ApiErrorServerResponse {
+export function isThrowedError(
+  error: unknown,
+): error is ApiErrorServerResponse {
   if ((error as ApiErrorServerResponse).type === "api-error") {
     return true;
   }
@@ -18,15 +20,17 @@ export function isThrowedError(error: unknown): error is ApiErrorServerResponse 
 export function structuredError(error: unknown): ApiErrorServerResponse {
   if (isApiError(error)) {
     const body = error.body as
-      | {
-          error: {message?: string; details?: string};
-        }
+      | { error: { message?: string; details?: string } }
       | undefined;
     const errorDetails = body?.error || {};
     return {
       type: "api-error",
       data: errorDetails.message || error.statusText || "Something went wrong",
-      message: errorDetails.details || errorDetails.message || error.statusText || "Something went wrong",
+      message:
+        errorDetails.details ||
+        errorDetails.message ||
+        error.statusText ||
+        "Something went wrong",
     };
   }
   if (isThrowedError(error)) {
@@ -40,22 +44,14 @@ export function structuredError(error: unknown): ApiErrorServerResponse {
 }
 
 export function structuredResponse<T>(data: T): ServerResponse<T> {
-  return {
-    type: "success",
-    data,
-    message: "",
-  };
+  return { type: "success", data, message: "" };
 }
 
 export function isErrorOnRequest<T>(
   response: ServerResponse<T>,
   lang: string,
   redirectToNotFound = true,
-): response is {
-  type: "api-error";
-  message: string;
-  data: string;
-} {
+): response is { type: "api-error"; message: string; data: string } {
   if (response.type === "success") return false;
 
   if (response.data === "Forbidden") {
@@ -69,9 +65,5 @@ export function isErrorOnRequest<T>(
 }
 
 export function structuredSuccessResponse<T>(data: T) {
-  return {
-    type: "success" as const,
-    data,
-    message: "",
-  };
+  return { type: "success" as const, data, message: "" };
 }

@@ -13,8 +13,11 @@ export async function isUnauthorized({
   redirect?: boolean;
   grantedPolicies?: Record<string, boolean> | null;
 }) {
-  const grantedPolicies = initalGrantedPolicies || (await getGrantedPoliciesApi());
-  const missingPolicies = requiredPolicies.filter((policy) => !grantedPolicies?.[policy]);
+  const grantedPolicies =
+    initalGrantedPolicies || (await getGrantedPoliciesApi());
+  const missingPolicies = requiredPolicies.filter(
+    (policy) => !grantedPolicies?.[policy],
+  );
   if (missingPolicies.length > 0) {
     if (!redirect) {
       return true;

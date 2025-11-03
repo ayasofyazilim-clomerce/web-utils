@@ -22,7 +22,9 @@ function getLocaleFromBrowser(request: NextRequest) {
   const negotiatorHeaders: Record<string, string> = {};
   request.headers.forEach((value, key) => (negotiatorHeaders[key] = value));
   const locales = i18n.locales;
-  const languages = new Negotiator({ headers: negotiatorHeaders }).languages(locales);
+  const languages = new Negotiator({ headers: negotiatorHeaders }).languages(
+    locales,
+  );
   return matchLocale(languages, locales, i18n.defaultLocale);
 }
 function getLocaleFromCookies(request: NextRequest) {
@@ -42,7 +44,11 @@ function getLocaleFromRequest(request: NextRequest) {
   return i18n.defaultLocale;
 }
 function getLocale(request: NextRequest) {
-  return getLocaleFromCookies(request) || getLocaleFromBrowser(request) || getLocaleFromRequest(request);
+  return (
+    getLocaleFromCookies(request) ||
+    getLocaleFromBrowser(request) ||
+    getLocaleFromRequest(request)
+  );
 }
 function isUserAuthorized(request: NextAuthRequest) {
   const user = request.auth?.user as MyUser;
@@ -61,8 +67,12 @@ function redirectToLocale(request: NextRequest, pathname: string) {
   return NextResponse.redirect(newUrl);
 }
 function redirectToLogin(request: NextRequest, locale: string) {
-  const redirectTo = encodeURIComponent(request.nextUrl.pathname + request.nextUrl.search);
-  const loginRoute = process.env.LOGIN_ROUTE ? process.env.LOGIN_ROUTE : "login";
+  const redirectTo = encodeURIComponent(
+    request.nextUrl.pathname + request.nextUrl.search,
+  );
+  const loginRoute = process.env.LOGIN_ROUTE
+    ? process.env.LOGIN_ROUTE
+    : "login";
   const newUrl = request.nextUrl.clone();
   newUrl.search = "";
   newUrl.pathname = `/${locale}/${loginRoute}`;
@@ -86,7 +96,10 @@ export const middleware: NextMiddleware = auth((request: NextAuthRequest) => {
   const pathParts = pathname.split("/").filter(Boolean);
 
   // 1. Check if the locale is valid
-  if (pathParts.length === 0 || (pathParts.length > 0 && !i18n.locales.includes(pathParts[0] || ""))) {
+  if (
+    pathParts.length === 0 ||
+    (pathParts.length > 0 && !i18n.locales.includes(pathParts[0] || ""))
+  ) {
     return redirectToLocale(request, pathname);
   }
   // 2. Check if the locale is the same as the one in the cookie
@@ -101,14 +114,19 @@ export const middleware: NextMiddleware = auth((request: NextAuthRequest) => {
   // 3. Check if the user is trying to access a protected route without authorization
   if (
     !isAuthenticated &&
-    ((!protectAllRoutes && protectedRoutes.some((route) => route === pathParts[1])) ||
-      (protectAllRoutes && !unauthorizedRoutes.some((route) => route === pathParts[1])))
+    ((!protectAllRoutes &&
+      protectedRoutes.some((route) => route === pathParts[1])) ||
+      (protectAllRoutes &&
+        !unauthorizedRoutes.some((route) => route === pathParts[1])))
   ) {
     return redirectToLogin(request, pathParts[0] || "");
   }
 
   // 4. Check if the user is trying to access a unauthorized route with authorization
-  if (isAuthenticated && unauthorizedRoutes.some((route) => route === pathParts[1])) {
+  if (
+    isAuthenticated &&
+    unauthorizedRoutes.some((route) => route === pathParts[1])
+  ) {
     return redirectToHome(request, pathParts[0] || "");
   }
 
