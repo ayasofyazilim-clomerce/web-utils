@@ -19,7 +19,9 @@ export async function getAccountServiceClient(accessToken?: string) {
   });
 }
 
-export async function signOutServer({ redirectTo = "/en/login" }: { redirectTo?: string } = {}) {
+export async function signOutServer({
+  redirectTo = "/en/login",
+}: { redirectTo?: string } = {}) {
   try {
     await signOut({ redirect: false });
   } catch (error) {
@@ -31,7 +33,10 @@ export async function signOutServer({ redirectTo = "/en/login" }: { redirectTo?:
 async function fetchScopes() {
   const scopes = await fetch(OPENID_URL)
     .then((response) => response.json())
-    .then((json: { scopes_supported?: string[] }) => json.scopes_supported?.join(" ") || "");
+    .then(
+      (json: { scopes_supported?: string[] }) =>
+        json.scopes_supported?.join(" ") || "",
+    );
   return scopes;
 }
 type TokenResponse = {
@@ -41,7 +46,7 @@ type TokenResponse = {
   error_description?: string;
   error?: {
     message?: string;
-  }
+  };
 };
 export async function fetchToken<T extends TokenResponse>(credentials: {
   username: string;
@@ -59,7 +64,9 @@ export async function fetchToken<T extends TokenResponse>(credentials: {
     scope: scopes,
   };
 
-  Object.entries(urlEncodedContent).forEach(([key, value]) => urlencoded.append(key, value));
+  Object.entries(urlEncodedContent).forEach(([key, value]) =>
+    urlencoded.append(key, value),
+  );
   const response = await fetch(TOKEN_URL, {
     method: "POST",
     headers: {
@@ -78,7 +85,9 @@ export async function fetchNewAccessTokenByRefreshToken(refreshToken: string) {
     grant_type: "refresh_token",
     refresh_token: refreshToken,
   };
-  Object.entries(urlEncodedContent).forEach(([key, value]) => urlencoded.append(key, value));
+  Object.entries(urlEncodedContent).forEach(([key, value]) =>
+    urlencoded.append(key, value),
+  );
   const response = await fetch(TOKEN_URL, {
     method: "POST",
     headers: {
@@ -88,11 +97,21 @@ export async function fetchNewAccessTokenByRefreshToken(refreshToken: string) {
     body: urlencoded,
   });
 
-  return await response.json() as { access_token: string; refresh_token: string; expires_in: number };
+  return (await response.json()) as {
+    access_token: string;
+    refresh_token: string;
+    expires_in: number;
+  };
 }
 
-export async function getUserData(access_token: string, refresh_token: string, expiration_date: number) {
-  const decoded_jwt = JSON.parse(Buffer.from(access_token.split(".")[1] || "", "base64").toString());
+export async function getUserData(
+  access_token: string,
+  refresh_token: string,
+  expiration_date: number,
+) {
+  const decoded_jwt = JSON.parse(
+    Buffer.from(access_token.split(".")[1] || "", "base64").toString(),
+  );
   return {
     access_token,
     refresh_token,
