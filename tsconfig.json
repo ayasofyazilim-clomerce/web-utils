@@ -1,12 +1,12 @@
 {
   "extends": "@workspace/typescript-config/nextjs.json",
   "compilerOptions": {
-    "allowImportingTsExtensions":true,
+    "allowImportingTsExtensions": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
+      "@/*": ["./*"]
     },
-    "plugins": [{"name": "next"}]
+    "plugins": [{ "name": "next" }]
   },
   "include": [
     "next-env.d.ts",

@@ -1,7 +1,7 @@
 "use client";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ServerResponse } from "./types";
-import { toast } from "sonner"
+import { toast } from "sonner";
 
 export const handlePutResponse = (
   response: { type: "success" | "api-error"; message: string },
@@ -23,7 +23,9 @@ export const handlePutResponse = (
 export const handlePostResponse = <T>(
   response: ServerResponse<T>,
   router?: AppRouterInstance,
-  redirectTo?: string | { prefix: string; identifier?: keyof T; suffix?: string },
+  redirectTo?:
+    | string
+    | { prefix: string; identifier?: keyof T; suffix?: string },
 ) => {
   if (response.type === "success") {
     toast.success("Created successfully");
@@ -32,7 +34,9 @@ export const handlePostResponse = <T>(
       router.push(redirectTo);
     } else if (redirectTo) {
       const { prefix, suffix, identifier } = redirectTo;
-      const id = identifier ? (response.data[identifier] as string).toString() : response.data;
+      const id = identifier
+        ? (response.data[identifier] as string).toString()
+        : response.data;
       router.push(suffix ? `${prefix}/${id}/${suffix}` : `${prefix}/${id}`);
     }
     router.refresh();
@@ -56,7 +60,10 @@ export const handleDeleteResponse = (
     toast.error(response.message);
   }
 };
-export const handleGetResponseError = (response: { type: "success" | "error" | "api-error"; message: string }) => {
+export const handleGetResponseError = (response: {
+  type: "success" | "error" | "api-error";
+  message: string;
+}) => {
   if (response.type !== "success") {
     toast.error(response.message);
   }
