@@ -9,7 +9,7 @@ export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError;
 }
 export function isThrowedError(
-  error: unknown,
+  error: unknown
 ): error is ApiErrorServerResponse {
   if ((error as ApiErrorServerResponse).type === "api-error") {
     return true;
@@ -50,7 +50,7 @@ export function structuredResponse<T>(data: T): ServerResponse<T> {
 export function isErrorOnRequest<T>(
   response: ServerResponse<T>,
   lang: string,
-  redirectToNotFound = true,
+  redirectToNotFound = true
 ): response is { type: "api-error"; message: string; data: string } {
   if (response.type === "success") return false;
 

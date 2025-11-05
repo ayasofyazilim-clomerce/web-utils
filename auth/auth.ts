@@ -31,7 +31,7 @@ const result = NextAuth({
             return authorizeError(
               signInResponse?.error?.message ||
                 signInResponse.error_description ||
-                "",
+                ""
             );
           }
           const { access_token, refresh_token, expires_in } = signInResponse;
@@ -40,7 +40,7 @@ const result = NextAuth({
           const user_data = await getUserData(
             access_token,
             refresh_token,
-            expiration_date,
+            expiration_date
           );
           return user_data;
         } catch (error) {

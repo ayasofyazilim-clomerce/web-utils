@@ -6,7 +6,7 @@ import { toast } from "sonner";
 export const handlePutResponse = (
   response: { type: "success" | "api-error"; message: string },
   router?: AppRouterInstance,
-  redirectTo?: string,
+  redirectTo?: string
 ) => {
   if (response.type === "success") {
     toast.success("Updated successfully");
@@ -25,7 +25,7 @@ export const handlePostResponse = <T>(
   router?: AppRouterInstance,
   redirectTo?:
     | string
-    | { prefix: string; identifier?: keyof T; suffix?: string },
+    | { prefix: string; identifier?: keyof T; suffix?: string }
 ) => {
   if (response.type === "success") {
     toast.success("Created successfully");
@@ -47,7 +47,7 @@ export const handlePostResponse = <T>(
 export const handleDeleteResponse = (
   response: { type: "success" | "error" | "api-error"; message: string },
   router?: AppRouterInstance,
-  redirectTo?: string,
+  redirectTo?: string
 ) => {
   if (response.type === "success") {
     toast.success("Deleted successfully");
