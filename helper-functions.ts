@@ -16,7 +16,7 @@ export function removeEmptyObjects<T>(obj: T): T {
             return Object.keys(value).length > 0;
           }
           return value !== undefined && value !== null;
-        }),
+        })
     );
   }
   return obj;

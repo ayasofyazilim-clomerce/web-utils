@@ -35,7 +35,7 @@ async function fetchScopes() {
     .then((response) => response.json())
     .then(
       (json: { scopes_supported?: string[] }) =>
-        json.scopes_supported?.join(" ") || "",
+        json.scopes_supported?.join(" ") || ""
     );
   return scopes;
 }
@@ -65,7 +65,7 @@ export async function fetchToken<T extends TokenResponse>(credentials: {
   };
 
   Object.entries(urlEncodedContent).forEach(([key, value]) =>
-    urlencoded.append(key, value),
+    urlencoded.append(key, value)
   );
   const response = await fetch(TOKEN_URL, {
     method: "POST",
@@ -86,7 +86,7 @@ export async function fetchNewAccessTokenByRefreshToken(refreshToken: string) {
     refresh_token: refreshToken,
   };
   Object.entries(urlEncodedContent).forEach(([key, value]) =>
-    urlencoded.append(key, value),
+    urlencoded.append(key, value)
   );
   const response = await fetch(TOKEN_URL, {
     method: "POST",
@@ -107,10 +107,10 @@ export async function fetchNewAccessTokenByRefreshToken(refreshToken: string) {
 export async function getUserData(
   access_token: string,
   refresh_token: string,
-  expiration_date: number,
+  expiration_date: number
 ) {
   const decoded_jwt = JSON.parse(
-    Buffer.from(access_token.split(".")[1] || "", "base64").toString(),
+    Buffer.from(access_token.split(".")[1] || "", "base64").toString()
   );
   return {
     access_token,

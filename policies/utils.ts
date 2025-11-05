@@ -16,7 +16,7 @@ export async function isUnauthorized({
   const grantedPolicies =
     initalGrantedPolicies || (await getGrantedPoliciesApi());
   const missingPolicies = requiredPolicies.filter(
-    (policy) => !grantedPolicies?.[policy],
+    (policy) => !grantedPolicies?.[policy]
   );
   if (missingPolicies.length > 0) {
     if (!redirect) {

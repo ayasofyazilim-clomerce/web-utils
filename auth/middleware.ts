@@ -23,7 +23,7 @@ function getLocaleFromBrowser(request: NextRequest) {
   request.headers.forEach((value, key) => (negotiatorHeaders[key] = value));
   const locales = i18n.locales;
   const languages = new Negotiator({ headers: negotiatorHeaders }).languages(
-    locales,
+    locales
   );
   return matchLocale(languages, locales, i18n.defaultLocale);
 }
@@ -68,7 +68,7 @@ function redirectToLocale(request: NextRequest, pathname: string) {
 }
 function redirectToLogin(request: NextRequest, locale: string) {
   const redirectTo = encodeURIComponent(
-    request.nextUrl.pathname + request.nextUrl.search,
+    request.nextUrl.pathname + request.nextUrl.search
   );
   const loginRoute = process.env.LOGIN_ROUTE
     ? process.env.LOGIN_ROUTE
