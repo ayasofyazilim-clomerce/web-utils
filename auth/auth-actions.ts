@@ -4,8 +4,8 @@ import { AccountServiceClient } from "@ayasofyazilim/core-saas/AccountService";
 import { redirect } from "next/navigation";
 import { signOut } from "./auth";
 
-const TOKEN_URL = `${process.env.TOKEN_URL}/connect/token`;
-const OPENID_URL = `${process.env.TOKEN_URL}/.well-known/openid-configuration`;
+const TOKEN_URL = `${process.env.GATEWAY_URL}/connect/token`;
+const OPENID_URL = `${process.env.GATEWAY_URL}/.well-known/openid-configuration`;
 const HEADERS = {
   "X-Requested-With": "XMLHttpRequest",
   "Content-Type": "application/json",
@@ -14,7 +14,7 @@ const HEADERS = {
 export async function getAccountServiceClient(accessToken?: string) {
   return new AccountServiceClient({
     TOKEN: accessToken,
-    BASE: process.env.TOKEN_URL,
+    BASE: process.env.GATEWAY_URL,
     HEADERS: HEADERS,
   });
 }
