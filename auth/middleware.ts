@@ -5,7 +5,7 @@ import { match as matchLocale } from "@formatjs/intl-localematcher";
 import type { NextAuthRequest } from "node_modules/next-auth/lib";
 import { auth } from "@repo/utils/auth/next-auth";
 import { MyUser } from "./auth-types";
-import type { NextMiddleware } from "next/server";
+import type { NextProxy } from "next/server";
 
 const homeRoute = process.env.HOME_ROUTE || "/";
 const protectedRoutes = process.env.PROTECTED_ROUTES?.split(",") || [];
@@ -85,7 +85,7 @@ function redirectToHome(request: NextRequest, locale: string) {
   return NextResponse.redirect(newUrl);
 }
 
-export const middleware: NextMiddleware = auth((request: NextAuthRequest) => {
+export const middleware: NextProxy = auth((request: NextAuthRequest) => {
   if (request.headers.has("next-action")) {
     return NextResponse.next();
   }
@@ -134,7 +134,7 @@ export const middleware: NextMiddleware = auth((request: NextAuthRequest) => {
   const response = NextResponse.next();
   response.cookies.set("locale", pathParts[0] || "");
   return response;
-}) as NextMiddleware;
+}) as NextProxy;
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
