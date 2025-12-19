@@ -1,6 +1,7 @@
 "use server";
 import { getAccountServiceClient } from "../auth/auth-actions";
 import { auth } from "../auth/auth";
+import { Policies } from "@/policies";
 
 export async function getGrantedPoliciesApi() {
   try {
@@ -9,7 +10,7 @@ export async function getGrantedPoliciesApi() {
     const response =
       await client.abpApplicationConfiguration.getApiAbpApplicationConfiguration();
     const grantedPolicies = response.auth?.grantedPolicies;
-    return grantedPolicies;
+    return grantedPolicies as Policies;
   } catch (error) {
     return undefined;
   }
