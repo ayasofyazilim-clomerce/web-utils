@@ -1,8 +1,7 @@
 "use server";
 import { getAccountServiceClient } from "../auth/auth-actions";
 import { auth } from "../auth/auth";
-import { Policies } from "@/policies";
-
+import { Policies } from "../policies/types";
 export async function getGrantedPoliciesApi() {
   try {
     const session = await auth();
