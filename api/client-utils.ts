@@ -13,8 +13,9 @@ export const handlePutResponse = (
     if (!router) return;
     if (redirectTo) {
       router.push(redirectTo);
+    } else {
+      router.refresh();
     }
-    router.refresh();
   } else {
     toast.error(response.message);
   }
@@ -38,8 +39,9 @@ export const handlePostResponse = <T>(
         ? (response.data[identifier] as string).toString()
         : response.data;
       router.push(suffix ? `${prefix}/${id}/${suffix}` : `${prefix}/${id}`);
+    } else {
+      router.refresh();
     }
-    router.refresh();
   } else {
     toast.error(response.message);
   }
@@ -54,8 +56,9 @@ export const handleDeleteResponse = (
     if (!router) return;
     if (redirectTo) {
       router.push(redirectTo);
+    } else {
+      router.refresh();
     }
-    router.refresh();
   } else {
     toast.error(response.message);
   }
