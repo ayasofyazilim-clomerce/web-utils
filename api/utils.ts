@@ -1,4 +1,4 @@
-import { ApiError } from "@ayasofyazilim/core-saas/AccountService";
+import { ApiError } from "@repo/core-saas/AccountService";
 import { notFound, permanentRedirect, RedirectType } from "next/navigation";
 import { ApiErrorServerResponse, ServerResponse } from "./types";
 

@@ -1,4 +1,4 @@
-import { ApiError } from "@ayasofyazilim/core-saas/AccountService";
+import { ApiError } from "@repo/core-saas/AccountService";
 
 export interface BaseServerResponse {
   message: string;

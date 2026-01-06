@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@auth/core": "^0.30.0",
-    "@ayasofyazilim/core-saas": "latest",
+    "@repo/core-saas": "workspace:*",
     "@formatjs/intl-localematcher": "^0.5.4",
     "@repo/ayasofyazilim-ui": "workspace:*",
     "@types/react": "^19.1.9",
