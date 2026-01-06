@@ -1,6 +1,6 @@
 "use server";
 
-import { AccountServiceClient } from "@ayasofyazilim/core-saas/AccountService";
+import { AccountServiceClient } from "@repo/core-saas/AccountService";
 import { redirect } from "next/navigation";
 import { signOut } from "./auth";
 
