@@ -50,8 +50,12 @@ const result = NextAuth({
     }),
   ],
   pages: {
-    signIn: process.env.AUTHJS_SIGNIN_PATH || "/",
-    signOut: process.env.AUTHJS_SIGNOUT_PATH || "/",
+    signIn: process.env.LOGIN_ROUTE?.startsWith("/")
+      ? process.env.LOGIN_ROUTE
+      : `/${process.env.LOGIN_ROUTE || "login"}`,
+    signOut: process.env.LOGIN_ROUTE?.startsWith("/")
+      ? process.env.LOGIN_ROUTE
+      : `/${process.env.LOGIN_ROUTE || "login"}`,
   },
   session: { strategy: "jwt" },
   callbacks: {
@@ -79,8 +83,9 @@ const result = NextAuth({
       return session;
     },
     authorized: async ({ auth }) => {
-      // Logged in users are authenticated, otherwise redirect to login page
-      return !!auth;
+      // We handle authorization logic in the middleware function itself
+      // to support specialized path-based logic ((auth), (public), (main) groups).
+      return true;
     },
     async jwt({ token, trigger, session, user }) {
       if (user) {
