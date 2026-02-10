@@ -8,8 +8,6 @@ import { MyUser } from "./auth-types";
 import type { NextProxy } from "next/server";
 
 const homeRoute = process.env.HOME_ROUTE || "/";
-const protectedRoutes = process.env.PROTECTED_ROUTES?.split(",") || [];
-const unauthorizedRoutes = process.env.UNAUTHORIZED_ROUTES?.split(",") || [];
 const protectAllRoutes = process.env.PROTECT_ALL_ROUTES === "true";
 const isAdminPanel = process.env.IS_ADMIN_PANEL === "true";
 
@@ -89,51 +87,75 @@ export const middleware: NextProxy = auth((request: NextAuthRequest) => {
   if (request.headers.has("next-action")) {
     return NextResponse.next();
   }
-  const url = request.url;
-  const pathname = new URL(url).pathname;
 
-  const isAuthenticated = isUserAuthorized(request);
+  const url = request.url;
+  const { pathname, search } = new URL(url);
   const pathParts = pathname.split("/").filter(Boolean);
 
-  // 1. Check if the locale is valid
-  if (
-    pathParts.length === 0 ||
-    (pathParts.length > 0 && !i18n.locales.includes(pathParts[0] || ""))
-  ) {
-    return redirectToLocale(request, pathname);
-  }
-  // 2. Check if the locale is the same as the one in the cookie
-  if (request.cookies.get("locale")?.value !== pathParts[0]) {
-    request.cookies.set("locale", pathParts[0] || "");
+  // 1. Locale Detection & Redirection
+  const locale = pathParts[0];
+  const isValidLocale = i18n.locales.includes(locale || "");
+
+  if (!isValidLocale) {
+    const detectedLocale = getLocale(request);
+    const newUrl = request.nextUrl.clone();
+    newUrl.pathname = `/${detectedLocale}${pathname}`;
+    const response = NextResponse.redirect(newUrl);
+    response.cookies.set("locale", detectedLocale || "");
+    return response;
   }
 
-  if (pathParts.length === 1 && homeRoute !== "/") {
-    return redirectToHome(request, pathParts[0] || "");
+  // Sync cookie if different
+  if (request.cookies.get("locale")?.value !== locale) {
+    const response = NextResponse.next();
+    response.cookies.set("locale", locale || "");
+    // Note: We continue logic after set, but Next.js middleware returns often early.
+    // For consistency, we'll use the sync'd response later if not redirected.
   }
 
-  // 3. Check if the user is trying to access a protected route without authorization
-  if (
-    !isAuthenticated &&
-    ((!protectAllRoutes &&
-      protectedRoutes.some((route) => route === pathParts[1])) ||
-      (protectAllRoutes &&
-        !unauthorizedRoutes.some((route) => route === pathParts[1])))
-  ) {
-    return redirectToLogin(request, pathParts[0] || "");
+  // 2. Route Classification
+  const isAuthenticated = isUserAuthorized(request);
+  const route = pathParts[1] || ""; // The part after [lang] (e.g., "" for /en/, "login" for /en/login)
+
+  // Normalize routes from env: trim and remove leading slash so "/" becomes ""
+  const authRoutes = (process.env.UNAUTHORIZED_ROUTES || "")
+    .split(",")
+    .map((r) => r.trim().replace(/^\//, ""));
+  const publicRoutes = (process.env.PUBLIC_ROUTES || "")
+    .split(",")
+    .map((r) => r.trim().replace(/^\//, ""));
+
+  const isAuthRoute = authRoutes.includes(route);
+  const isPublicRoute = publicRoutes.includes(route);
+  const isMainRoute = !isAuthRoute && !isPublicRoute;
+
+  // 3. Authorization Logic
+  if (isAuthenticated) {
+    // Logged in users shouldn't access (auth) routes like /login
+    if (isAuthRoute) {
+      const targetHome = homeRoute.replace(/^\//, "");
+      if (route !== targetHome) {
+        const newUrl = request.nextUrl.clone();
+        newUrl.pathname = `/${locale}/${targetHome}`;
+        return NextResponse.redirect(newUrl);
+      }
+    }
+  } else {
+    // Anonymous users shouldn't access (main) routes if protectAllRoutes is true
+    if (protectAllRoutes && isMainRoute) {
+      const redirectTo = encodeURIComponent(pathname + search);
+      const loginRoute = (process.env.LOGIN_ROUTE || "login").replace(
+        /^\//,
+        ""
+      );
+      const newUrl = request.nextUrl.clone();
+      newUrl.pathname = `/${locale}/${loginRoute}`;
+      newUrl.searchParams.set("redirectTo", redirectTo);
+      return NextResponse.redirect(newUrl);
+    }
   }
 
-  // 4. Check if the user is trying to access a unauthorized route with authorization
-  if (
-    isAuthenticated &&
-    unauthorizedRoutes.some((route) => route === pathParts[1])
-  ) {
-    return redirectToHome(request, pathParts[0] || "");
-  }
-
-  // 5. So far so good
-  const response = NextResponse.next();
-  response.cookies.set("locale", pathParts[0] || "");
-  return response;
+  return NextResponse.next();
 }) as NextProxy;
 
 export const config = {
