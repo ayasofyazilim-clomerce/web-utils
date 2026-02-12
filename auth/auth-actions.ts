@@ -30,7 +30,7 @@ export async function signOutServer({
   redirect(redirectTo);
 }
 
-async function fetchScopes() {
+export async function fetchScopes() {
   const scopes = await fetch(OPENID_URL)
     .then((response) => response.json())
     .then(

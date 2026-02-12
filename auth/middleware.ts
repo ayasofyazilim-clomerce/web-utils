@@ -55,33 +55,6 @@ function isUserAuthorized(request: NextAuthRequest) {
   }
   return Boolean(user?.access_token && (user.userName || user.email));
 }
-function redirectToLocale(request: NextRequest, pathname: string) {
-  const locale = getLocale(request);
-  if (request.cookies.get("locale")?.value !== locale) {
-    request.cookies.set("locale", locale || "");
-  }
-  const newUrl = request.nextUrl.clone();
-  newUrl.pathname = `/${locale}${pathname}`;
-  return NextResponse.redirect(newUrl);
-}
-function redirectToLogin(request: NextRequest, locale: string) {
-  const redirectTo = encodeURIComponent(
-    request.nextUrl.pathname + request.nextUrl.search
-  );
-  const loginRoute = process.env.LOGIN_ROUTE
-    ? process.env.LOGIN_ROUTE
-    : "login";
-  const newUrl = request.nextUrl.clone();
-  newUrl.search = "";
-  newUrl.pathname = `/${locale}/${loginRoute}`;
-  newUrl.searchParams.set("redirectTo", redirectTo);
-  return NextResponse.redirect(newUrl);
-}
-function redirectToHome(request: NextRequest, locale: string) {
-  const newUrl = request.nextUrl.clone();
-  newUrl.pathname = `/${locale}/${homeRoute}`;
-  return NextResponse.redirect(newUrl);
-}
 
 export const middleware: NextProxy = auth((request: NextAuthRequest) => {
   if (request.headers.has("next-action")) {
@@ -95,7 +68,7 @@ export const middleware: NextProxy = auth((request: NextAuthRequest) => {
   // 1. Locale Detection & Redirection
   const locale = pathParts[0];
   const isValidLocale = i18n.locales.includes(locale || "");
-
+  // console.log(`Middleware: Pathname=${pathname}, Detected Locale=${locale}, Valid Locale=${isValidLocale}`);
   if (!isValidLocale) {
     const detectedLocale = getLocale(request);
     const newUrl = request.nextUrl.clone();
@@ -120,17 +93,22 @@ export const middleware: NextProxy = auth((request: NextAuthRequest) => {
   // Normalize routes from env: trim and remove leading slash so "/" becomes ""
   const authRoutes = (process.env.UNAUTHORIZED_ROUTES || "")
     .split(",")
-    .map((r) => r.trim().replace(/^\//, ""));
+    .map((r) => r.trim().replace(/^\//, ""))
+    .filter(Boolean); // Remove empty strings
   const publicRoutes = (process.env.PUBLIC_ROUTES || "")
     .split(",")
-    .map((r) => r.trim().replace(/^\//, ""));
+    .map((r) => r.trim().replace(/^\//, ""))
+    .filter(Boolean); // Remove empty strings
 
   const isAuthRoute = authRoutes.includes(route);
   const isPublicRoute = publicRoutes.includes(route);
   const isMainRoute = !isAuthRoute && !isPublicRoute;
 
+  // console.log(`Route classification: route="${route}", authRoutes=${JSON.stringify(authRoutes)}, isAuthRoute=${isAuthRoute}, isPublicRoute=${isPublicRoute}, isMainRoute=${isMainRoute}`);
+
   // 3. Authorization Logic
   if (isAuthenticated) {
+    // console.log(`Authenticated user accessing: ${pathname}`);
     // Logged in users shouldn't access (auth) routes like /login
     if (isAuthRoute) {
       const targetHome = homeRoute.replace(/^\//, "");
@@ -141,9 +119,19 @@ export const middleware: NextProxy = auth((request: NextAuthRequest) => {
       }
     }
   } else {
+    // console.log(`Unauthenticated user accessing: ${pathname}, Locale=${locale},protectAllRoutes=${protectAllRoutes}, isMainRoute=${isMainRoute}`);
     // Anonymous users shouldn't access (main) routes if protectAllRoutes is true
     if (protectAllRoutes && isMainRoute) {
-      const redirectTo = encodeURIComponent(pathname + search);
+      // console.log(`Redirecting to login: ${pathname}`);
+
+      // If accessing root locale path (e.g., /en), redirect to home after login
+      // Otherwise, the user would be redirected back to /en which doesn't exist (404)
+      const targetAfterLogin =
+        route === ""
+          ? `/${locale}/${homeRoute.replace(/^\//, "")}`
+          : pathname + search;
+
+      const redirectTo = encodeURIComponent(targetAfterLogin);
       const loginRoute = (process.env.LOGIN_ROUTE || "login").replace(
         /^\//,
         ""

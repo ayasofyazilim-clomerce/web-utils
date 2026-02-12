@@ -13,6 +13,8 @@ import { MyUser } from "./auth-types";
 const result = NextAuth({
   providers: [
     Credentials({
+      id: "credentials",
+      name: "Credentials",
       credentials: { username: {}, password: {}, tenantId: {} },
       authorize: async (credentials) => {
         function authorizeError(message: string) {
@@ -41,6 +43,33 @@ const result = NextAuth({
             access_token,
             refresh_token,
             expiration_date
+          );
+          return user_data;
+        } catch (error) {
+          return authorizeError(JSON.stringify(error));
+        }
+      },
+    }),
+    Credentials({
+      id: "ssr-token",
+      name: "SSR Token",
+      credentials: { accessToken: {}, expiresIn: {} },
+      authorize: async (credentials) => {
+        function authorizeError(message: string) {
+          return Promise.reject(new AuthError(JSON.stringify(message)));
+        }
+        try {
+          if (!credentials?.accessToken || !credentials?.expiresIn) {
+            return authorizeError("Missing SSR token credentials");
+          }
+
+          const expirationDate =
+            Number(credentials.expiresIn) * 1000 + Date.now();
+
+          const user_data = await getUserData(
+            credentials.accessToken as string,
+            "", // SSR login doesn't provide refresh token
+            expirationDate
           );
           return user_data;
         } catch (error) {
