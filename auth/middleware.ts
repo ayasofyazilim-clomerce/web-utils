@@ -21,7 +21,7 @@ function getLocaleFromBrowser(request: NextRequest) {
   request.headers.forEach((value, key) => (negotiatorHeaders[key] = value));
   const locales = i18n.locales;
   const languages = new Negotiator({ headers: negotiatorHeaders }).languages(
-    locales,
+    locales
   );
   return matchLocale(languages, locales, i18n.defaultLocale);
 }
@@ -138,7 +138,7 @@ export const middleware: NextProxy = auth((request: NextAuthRequest) => {
       const redirectTo = encodeURIComponent(targetAfterLogin);
       const loginRoute = (process.env.LOGIN_ROUTE || "login").replace(
         /^\//,
-        "",
+        ""
       );
       const newUrl = request.nextUrl.clone();
       newUrl.pathname = `/${locale}/${loginRoute}`;
