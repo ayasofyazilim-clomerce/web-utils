@@ -11,7 +11,7 @@ export interface MyUser {
   tenantName?: string;
 
   refresh_token: string;
-  access_token: string;
+  access_token?: string;
   expiration_date: number;
 }
 

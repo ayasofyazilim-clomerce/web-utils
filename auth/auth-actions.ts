@@ -113,13 +113,21 @@ export async function getUserData(
     Buffer.from(access_token.split(".")[1] || "", "base64").toString()
   );
   return {
-    access_token,
     refresh_token,
     expiration_date,
     userName: decoded_jwt.unique_name,
     name: decoded_jwt.given_name,
-    surname: "",
-
-    ...decoded_jwt,
+    surname: decoded_jwt.family_name ?? "",
+    email: decoded_jwt.email,
+    sub: decoded_jwt.sub,
+    role: decoded_jwt.role,
+    CustomsId: decoded_jwt.CustomsId,
+    MerchantId: decoded_jwt.MerchantId,
+    RefundPointId: decoded_jwt.RefundPointId,
+    TaxFreeId: decoded_jwt.TaxFreeId,
+    TaxOfficeId: decoded_jwt.TaxOfficeId,
+    TourGuideId: decoded_jwt.TourGuideId,
+    TravellerId: decoded_jwt.TravellerId,
+    PartyLevel: decoded_jwt.PartyLevel,
   };
 }
