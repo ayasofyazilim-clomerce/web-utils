@@ -97,15 +97,16 @@ const result = NextAuth({
     async session({ session, token }) {
       if (token?.user) {
         const user = token?.user as AdapterUser & MyUser;
-        if (user.expiration_date < Date.now()) {
-          const { access_token, refresh_token, expires_in } =
-            await fetchNewAccessTokenByRefreshToken(user.refresh_token || "");
+        const { access_token, refresh_token, expires_in } =
+          await fetchNewAccessTokenByRefreshToken(user.refresh_token || "");
 
-          if (access_token && refresh_token) {
-            user.access_token = access_token;
-            user.refresh_token = refresh_token;
-            user.expiration_date = expires_in * 1000 + Date.now();
-          }
+        if (access_token) {
+          user.access_token = access_token;
+        }
+        // Update cookie-persisted fields if refresh token was rotated
+        if (refresh_token) {
+          user.refresh_token = refresh_token;
+          user.expiration_date = expires_in * 1000 + Date.now();
         }
         session.user = user;
       }
