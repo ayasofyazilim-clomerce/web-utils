@@ -20,11 +20,25 @@ interface TokenCacheEntry {
   expiresAt: number;
   lastAccessedAt: number;
 }
-const tokenCache = new Map<string, TokenCacheEntry>();
+
+// Persist caches on globalThis so they survive Next.js HMR re-evaluations in dev.
+// Without this, every code change wipes the in-memory tokens and forces re-login.
+const globalForAuth = globalThis as typeof globalThis & {
+  __tokenCache?: Map<string, TokenCacheEntry>;
+  __inflightRefresh?: Map<string, Promise<TokenCacheEntry | null>>;
+};
+const tokenCache =
+  globalForAuth.__tokenCache ??
+  (globalForAuth.__tokenCache = new Map<string, TokenCacheEntry>());
 
 // In-flight refresh promises keyed by sub.
 // Prevents thundering-herd: concurrent requests for the same user share one refresh call.
-const inflightRefresh = new Map<string, Promise<TokenCacheEntry | null>>();
+const inflightRefresh =
+  globalForAuth.__inflightRefresh ??
+  (globalForAuth.__inflightRefresh = new Map<
+    string,
+    Promise<TokenCacheEntry | null>
+  >());
 
 // Refresh 60 seconds before actual expiry to avoid using a stale token.
 const TOKEN_REFRESH_BUFFER_MS = 60_000;
