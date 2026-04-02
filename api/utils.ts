@@ -67,3 +67,27 @@ export function isErrorOnRequest<T>(
 export function structuredSuccessResponse<T>(data: T) {
   return { type: "success" as const, data, message: "" };
 }
+
+export function withPerformanceLogging<
+  T extends { request: { request: (...args: any[]) => any } },
+>(client: T, serviceName: string): T {
+  const originalRequest = client.request.request.bind(client.request);
+  client.request.request = function (options: { method: string; url: string }) {
+    const start = performance.now();
+    const promise = originalRequest(options);
+    promise.then(
+      () => {
+        console.log(
+          `[BACKEND CALL] ${serviceName} ${options.method} ${options.url} took ${(performance.now() - start).toFixed(2)} ms`
+        );
+      },
+      () => {
+        console.log(
+          `[BACKEND CALL] ${serviceName} ${options.method} ${options.url} FAILED after ${(performance.now() - start).toFixed(2)} ms`
+        );
+      }
+    );
+    return promise;
+  };
+  return client;
+}

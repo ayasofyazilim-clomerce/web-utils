@@ -5,6 +5,7 @@ export interface MyUser {
   name: string;
   surname: string;
   role: string;
+  sub?: string;
 
   //tenant
   tenantId?: string;

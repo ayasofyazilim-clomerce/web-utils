@@ -2,7 +2,7 @@
 
 import { AccountServiceClient } from "@repo/core-saas/AccountService";
 import { redirect } from "next/navigation";
-import { signOut } from "./auth";
+import { auth, deleteTokenCache, setTokenCache, signOut } from "./auth";
 
 const TOKEN_URL = `${process.env.GATEWAY_URL}/connect/token`;
 const OPENID_URL = `${process.env.GATEWAY_URL}/.well-known/openid-configuration`;
@@ -23,6 +23,9 @@ export async function signOutServer({
   redirectTo = "/en/login",
 }: { redirectTo?: string } = {}) {
   try {
+    const session = await auth();
+    const sub = session?.user?.sub;
+    if (sub) deleteTokenCache(sub);
     await signOut({ redirect: false });
   } catch (error) {
     return { error: "Unknown error" };
@@ -130,4 +133,38 @@ export async function getUserData(
     TravellerId: decoded_jwt.TravellerId,
     PartyLevel: decoded_jwt.PartyLevel,
   };
+}
+
+/**
+ * Server action: refresh tokens after an affiliation switch.
+ * Returns the new user data (claims) for the session update.
+ * The heavy token refresh happens server-side, not on the client.
+ */
+export async function refreshSessionAfterAffiliationSwitch() {
+  const session = await auth();
+  const user = session?.user as Record<string, string> | undefined;
+  const sub = user?.sub;
+  const refreshToken = user?.refresh_token;
+  if (!refreshToken) {
+    throw new Error("No refresh token available");
+  }
+
+  // Re-fetch new tokens since affiliation change invalidates current claims
+  const result = await fetchNewAccessTokenByRefreshToken(refreshToken);
+  if (!result.access_token) {
+    throw new Error("Token refresh failed");
+  }
+
+  const expiresAt = result.expires_in * 1000 + Date.now();
+  if (sub) {
+    setTokenCache(sub, result.refresh_token, result.access_token, expiresAt);
+  }
+
+  // Return user data extracted from the new access_token (for session update)
+  const userData = await getUserData(
+    result.access_token,
+    result.refresh_token,
+    expiresAt
+  );
+  return userData;
 }

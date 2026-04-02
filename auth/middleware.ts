@@ -51,9 +51,9 @@ function getLocale(request: NextRequest) {
 function isUserAuthorized(request: NextAuthRequest) {
   const user = request.auth?.user as MyUser;
   if (isAdminPanel) {
-    return Boolean(user?.access_token && user.role === "admin");
+    return Boolean(user?.role === "admin" && (user.userName || user.email));
   }
-  return Boolean(user?.access_token && (user.userName || user.email));
+  return Boolean(user?.userName || user?.email);
 }
 
 export const middleware: NextProxy = auth((request: NextAuthRequest) => {
