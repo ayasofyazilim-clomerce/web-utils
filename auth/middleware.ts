@@ -2,9 +2,8 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import Negotiator from "negotiator";
 import { match as matchLocale } from "@formatjs/intl-localematcher";
-import type { NextAuthRequest } from "node_modules/next-auth/lib";
 import { auth } from "@repo/utils/auth/next-auth";
-import { MyUser } from "./auth-types";
+import { MyUser, NextAuthRequest } from "./auth-types";
 import type { NextProxy } from "next/server";
 
 const homeRoute = process.env.HOME_ROUTE || "/";
