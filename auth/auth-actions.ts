@@ -131,6 +131,7 @@ export async function getUserData(
     TaxOfficeId: decoded_jwt.TaxOfficeId,
     TourGuideId: decoded_jwt.TourGuideId,
     TravellerId: decoded_jwt.TravellerId,
+    TravellerDocumentId: decoded_jwt.TravellerDocumentId,
     PartyLevel: decoded_jwt.PartyLevel,
   };
 }
