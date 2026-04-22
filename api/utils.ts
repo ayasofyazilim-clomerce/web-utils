@@ -77,13 +77,15 @@ export function withPerformanceLogging<
     const promise = originalRequest(options);
     promise.then(
       () => {
+        // \x1b[32m = Green | \x1b[33m = Yellow | \x1b[0m = Reset
         console.log(
-          `[BACKEND CALL] ${serviceName} ${options.method} ${options.url} took ${(performance.now() - start).toFixed(2)} ms`
+          `\x1b[32m[BACKEND CALL]\x1b[0m ${serviceName} ${options.method} ${options.url} \x1b[33mtook ${(performance.now() - start).toFixed(2)} ms\x1b[0m`
         );
       },
       () => {
+        // \x1b[31m = Red | \x1b[1m = Bold
         console.log(
-          `[BACKEND CALL] ${serviceName} ${options.method} ${options.url} FAILED after ${(performance.now() - start).toFixed(2)} ms`
+          `\x1b[31m\x1b[1m[BACKEND CALL] FAILED\x1b[0m ${serviceName} ${options.method} ${options.url} \x1b[33mafter ${(performance.now() - start).toFixed(2)} ms\x1b[0m`
         );
       }
     );
