@@ -1,3 +1,6 @@
+import { Session } from "next-auth";
+import { NextRequest } from "next/server";
+
 export interface MyUser {
   //user
   userName: string;
@@ -5,6 +8,7 @@ export interface MyUser {
   name: string;
   surname: string;
   role: string;
+  sub?: string;
 
   //tenant
   tenantId?: string;
@@ -16,3 +20,6 @@ export interface MyUser {
 }
 
 export type { Session } from "next-auth";
+export interface NextAuthRequest extends NextRequest {
+  auth: Session | null;
+}

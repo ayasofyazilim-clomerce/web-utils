@@ -67,3 +67,29 @@ export function isErrorOnRequest<T>(
 export function structuredSuccessResponse<T>(data: T) {
   return { type: "success" as const, data, message: "" };
 }
+
+export function withPerformanceLogging<
+  T extends { request: { request: (...args: any[]) => any } },
+>(client: T, serviceName: string): T {
+  const originalRequest = client.request.request.bind(client.request);
+  client.request.request = function (options: { method: string; url: string }) {
+    const start = performance.now();
+    const promise = originalRequest(options);
+    promise.then(
+      () => {
+        // \x1b[32m = Green | \x1b[33m = Yellow | \x1b[0m = Reset
+        console.log(
+          `\x1b[32m[BACKEND CALL]\x1b[0m ${serviceName} ${options.method} ${options.url} \x1b[33mtook ${(performance.now() - start).toFixed(2)} ms\x1b[0m`
+        );
+      },
+      () => {
+        // \x1b[31m = Red | \x1b[1m = Bold
+        console.log(
+          `\x1b[31m\x1b[1m[BACKEND CALL] FAILED\x1b[0m ${serviceName} ${options.method} ${options.url} \x1b[33mafter ${(performance.now() - start).toFixed(2)} ms\x1b[0m`
+        );
+      }
+    );
+    return promise;
+  };
+  return client;
+}
