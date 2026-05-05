@@ -102,7 +102,16 @@ async function resolveAccessToken(sub: string | undefined) {
 
   const cached = tokenCache.get(sub);
   //console.log(`[auth] resolveAccessToken: sub=${sub}, cacheHit=${!!cached}, cacheSize=${tokenCache.size}`);
-  if (!cached?.refresh_token) return null;
+  if (!cached) return null;
+
+  // SSR-token login: no refresh_token (empty string). Return cached entry if still valid.
+  if (!cached.refresh_token) {
+    if (cached.expiresAt > Date.now() + TOKEN_REFRESH_BUFFER_MS) {
+      cached.lastAccessedAt = Date.now();
+      return cached;
+    }
+    return null;
+  }
 
   // Cache hit — still valid
   if (cached.expiresAt > Date.now() + TOKEN_REFRESH_BUFFER_MS) {
