@@ -117,12 +117,9 @@ export const middleware: NextProxy = auth((request: NextAuthRequest) => {
   if (isAuthenticated) {
     // Logged in users shouldn't access (auth) routes like /login
     if (isAuthRoute) {
-      const targetHome = homeRoute.replace(/^\//, "");
-      if (route !== targetHome) {
-        const newUrl = request.nextUrl.clone();
-        newUrl.pathname = `/${locale}/${targetHome}`;
-        return NextResponse.redirect(newUrl);
-      }
+      const newUrl = request.nextUrl.clone();
+      newUrl.pathname = `/${locale}`;
+      return NextResponse.redirect(newUrl);
     }
   } else {
     // When protectAllRoutes=true, protect all routes except public and auth routes
