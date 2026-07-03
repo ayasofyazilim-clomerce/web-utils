@@ -22,11 +22,13 @@ export async function getAccountServiceClient(accessToken?: string) {
 export async function signOutServer({
   redirectTo = "/en/login",
   redirect: shouldRedirect = true,
-}: { redirectTo?: string; redirect?: boolean } = {}) {
+}: { redirectTo?: string; redirect?: boolean } = {}): Promise<{
+  error: string;
+}> {
   try {
     const session = await auth();
     const sub = session?.user?.sub;
-    if (sub) deleteTokenCache(sub);
+    if (sub) await deleteTokenCache(sub);
     await signOut({ redirect: false });
   } catch (error) {
     return { error: "Unknown error" };
@@ -34,6 +36,9 @@ export async function signOutServer({
   // Callers that need to clear a stale session in place (e.g. the public
   // /validate KYC step) pass redirect:false so we don't bounce to /login.
   if (shouldRedirect) redirect(redirectTo);
+  // Reached only when redirect:false — always return an object (never
+  // undefined) so callers typed `() => Promise<object>` stay satisfied.
+  return { error: "" };
 }
 
 export async function fetchScopes() {
@@ -161,7 +166,12 @@ export async function refreshSessionAfterAffiliationSwitch() {
 
   const expiresAt = result.expires_in * 1000 + Date.now();
   if (sub) {
-    setTokenCache(sub, result.refresh_token, result.access_token, expiresAt);
+    await setTokenCache(
+      sub,
+      result.refresh_token,
+      result.access_token,
+      expiresAt
+    );
   }
 
   // Return user data extracted from the new access_token (for session update)
