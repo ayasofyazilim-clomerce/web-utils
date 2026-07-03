@@ -31,6 +31,7 @@ export function structuredError(error: unknown): ApiErrorServerResponse {
         errorDetails.message ||
         error.statusText ||
         "Something went wrong",
+      status: error.status,
     };
   }
   if (isThrowedError(error)) {
