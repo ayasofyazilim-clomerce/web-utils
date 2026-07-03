@@ -21,7 +21,8 @@ export async function getAccountServiceClient(accessToken?: string) {
 
 export async function signOutServer({
   redirectTo = "/en/login",
-}: { redirectTo?: string } = {}) {
+  redirect: shouldRedirect = true,
+}: { redirectTo?: string; redirect?: boolean } = {}) {
   try {
     const session = await auth();
     const sub = session?.user?.sub;
@@ -30,7 +31,9 @@ export async function signOutServer({
   } catch (error) {
     return { error: "Unknown error" };
   }
-  redirect(redirectTo);
+  // Callers that need to clear a stale session in place (e.g. the public
+  // /validate KYC step) pass redirect:false so we don't bounce to /login.
+  if (shouldRedirect) redirect(redirectTo);
 }
 
 export async function fetchScopes() {
