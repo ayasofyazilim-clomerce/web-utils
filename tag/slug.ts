@@ -6,7 +6,7 @@
  * base64url-encoded for the URL, so it is decoded first, then the braces are
  * stripped, split on commas, and each pair split on its first colon.
  *
- * This is reversible (base64), NOT a one-way hash — despite "SHA256" wording
+ * This is reversible (base64), NOT a one-way hash - despite "SHA256" wording
  * that has appeared in callers; a hash could not be decoded back to fields.
  *
  * Built on the `atob`/`TextDecoder` web globals (available in Node 18+, the
@@ -62,7 +62,7 @@ export function decodeTagSlug(slug: string): TagSlugData {
 /**
  * Decodes a scanned tag QR/barcode into its fields. The scanned value is
  * usually the public-tag URL (`…/tag/<slug>`), but a bare slug is accepted too
- * — the `<slug>` segment is extracted before decoding. Use this for camera /
+ * - the `<slug>` segment is extracted before decoding. Use this for camera /
  * wedge scanners; use {@link decodeTagSlug} when you already hold a bare slug
  * (e.g. a route param).
  */
@@ -88,8 +88,8 @@ function slugFromScan(scanned: string): string {
  */
 function decodeSlugPayload(slug: string): string {
   // A well-formed slug is base64url (`[A-Za-z0-9-_]`) and never contains `%`.
-  // If percent-encoding survived — e.g. a standard-base64 `=` padding arriving
-  // as `%3D` — peel it back first. Otherwise a lenient base64 decoder drops the
+  // If percent-encoding survived - e.g. a standard-base64 `=` padding arriving
+  // as `%3D` - peel it back first. Otherwise a lenient base64 decoder drops the
   // `%` and reads the leftover hex (`3D`) as data, corrupting the tail
   // (e.g. `...A25T21041}` decodes to `...A25T21041}7`). The cap guards against
   // pathological input that never stops changing.
@@ -100,7 +100,7 @@ function decodeSlugPayload(slug: string): string {
       if (decoded === normalized) break;
       normalized = decoded;
     } catch {
-      // Malformed percent-encoding — fall through with what we have.
+      // Malformed percent-encoding - fall through with what we have.
       break;
     }
   }
@@ -118,7 +118,7 @@ function decodeSlugPayload(slug: string): string {
 /**
  * Isomorphic base64 → UTF-8 decode via the `atob`/`TextDecoder` web globals.
  * Unlike a lenient `Buffer.from(..., "base64")`, `atob` throws on invalid input
- * — which is caught here and surfaced as "" so a non-base64 (e.g. raw `{...}`)
+ * - which is caught here and surfaced as "" so a non-base64 (e.g. raw `{...}`)
  * slug falls through to the raw-payload path in the caller.
  */
 function base64ToUtf8(b64: string): string {

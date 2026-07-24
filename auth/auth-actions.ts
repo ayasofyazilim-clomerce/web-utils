@@ -36,7 +36,7 @@ export async function signOutServer({
   // Callers that need to clear a stale session in place (e.g. the public
   // /validate KYC step) pass redirect:false so we don't bounce to /login.
   if (shouldRedirect) redirect(redirectTo);
-  // Reached only when redirect:false — always return an object (never
+  // Reached only when redirect:false - always return an object (never
   // undefined) so callers typed `() => Promise<object>` stay satisfied.
   return { error: "" };
 }

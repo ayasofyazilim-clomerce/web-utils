@@ -3,16 +3,16 @@ import Redis from "ioredis";
 // Two-layer token store for the auth BFF.
 //
 // L1 = per-instance in-memory Map: fast, and the ONLY layer when no Redis is
-//      configured (local dev) — preserving the previous behavior exactly.
+//      configured (local dev) - preserving the previous behavior exactly.
 // L2 = Redis: shared + persistent, the source of truth. It makes sessions
-//      survive instance restarts and work across instances — an instance that
+//      survive instance restarts and work across instances - an instance that
 //      did not handle sign-in still finds the tokens (the fix for
 //      "instance down → everyone logged out"). L1 is a read-through cache in
 //      front of it.
 //
 // Enable by setting AUTH_REDIS_URL (your own Redis, or the backend's shared
 // instance with AUTH_REDIS_PREFIX to avoid key collisions). Tokens live only in
-// this store — never in the JWT cookie — so the cookie stays small (no HTTP 431).
+// this store - never in the JWT cookie - so the cookie stays small (no HTTP 431).
 
 export interface TokenCacheEntry {
   access_token: string;
@@ -43,16 +43,16 @@ function maskUrl(url: string): string {
 }
 
 // One-time signal at startup so it's obvious which store is active in the logs.
-// NOTE: "configured" only means the URL is set — the client connects lazily on
+// NOTE: "configured" only means the URL is set - the client connects lazily on
 // the first auth request. A successful connection is confirmed separately by the
 // "Redis connected" line below (or reported by "Redis error").
 if (REDIS_URL) {
   console.log(
-    `[auth-token-store] Redis configured (${maskUrl(REDIS_URL)}, prefix "${PREFIX}") — not connected yet; watch for "Redis connected".`
+    `[auth-token-store] Redis configured (${maskUrl(REDIS_URL)}, prefix "${PREFIX}") - not connected yet; watch for "Redis connected".`
   );
 } else {
   console.log(
-    "[auth-token-store] AUTH_REDIS_URL not set — using in-memory store (per-instance; sessions drop on restart)."
+    "[auth-token-store] AUTH_REDIS_URL not set - using in-memory store (per-instance; sessions drop on restart)."
   );
 }
 
@@ -66,15 +66,15 @@ function redis(): Redis | null {
         connectTimeout: 10_000,
         // Bound how long a command waits when Redis is unreachable so the hot
         // path falls back to L1 quickly instead of hanging. Offline queue stays
-        // ON (default) so a command issued while still connecting — e.g. the
-        // first request right after an instance restart — waits for the
+        // ON (default) so a command issued while still connecting - e.g. the
+        // first request right after an instance restart - waits for the
         // connection instead of failing and logging the user out.
         commandTimeout: 3_000,
       });
       client.on("ready", () =>
         console.log("[auth-token-store] Redis connected")
       );
-      // Never let a connection error crash the process — every caller below
+      // Never let a connection error crash the process - every caller below
       // falls back to L1 on failure. Throttle so retries don't flood logs.
       let lastErrorLog = 0;
       client.on("error", (err: Error) => {
