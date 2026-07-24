@@ -18,12 +18,12 @@ import {
 } from "./token-store";
 
 // Server-side token store. Tokens NEVER live in the JWT cookie (that grows with
-// ABP claims and caused HTTP 431) — they live in token-store.ts: a per-instance
+// ABP claims and caused HTTP 431) - they live in token-store.ts: a per-instance
 // in-memory L1 in front of a shared, persistent Redis L2 (enabled via
 // AUTH_REDIS_URL). L2 is what makes a session survive an instance restart and
 // work across instances; without it we fall back to L1 only (previous behavior).
 
-// In-flight refresh promises keyed by sub. Per-instance dedup only — prevents a
+// In-flight refresh promises keyed by sub. Per-instance dedup only - prevents a
 // thundering herd of refresh calls for the same user on one instance.
 const globalForAuth = globalThis as typeof globalThis & {
   __inflightRefresh?: Map<string, Promise<TokenCacheEntry | null>>;
@@ -74,13 +74,13 @@ async function resolveAccessToken(sub: string | undefined) {
     return null;
   }
 
-  // Still valid — use it. (storeGet already preferred a fresher L2 copy if one
+  // Still valid - use it. (storeGet already preferred a fresher L2 copy if one
   // exists, e.g. after another instance refreshed.)
   if (cached.expiresAt > Date.now() + TOKEN_REFRESH_BUFFER_MS) {
     return cached;
   }
 
-  // Expired — refresh it, deduplicating concurrent calls for the same user
+  // Expired - refresh it, deduplicating concurrent calls for the same user
   // (per instance). The result is written to the shared store for all instances.
   const inflight = inflightRefresh.get(sub);
   if (inflight) return inflight;
@@ -244,7 +244,7 @@ const result = NextAuth({
           token.user = { ...(token.user as object), ...session.info };
         }
       }
-      // Strip ALL tokens from the cookie — they live in the server-side cache only.
+      // Strip ALL tokens from the cookie - they live in the server-side cache only.
       // This reduces the cookie from ~9KB to ~1-2KB, preventing HTTP 431 errors.
       if (token.user) {
         const u = token.user as Record<string, unknown>;
