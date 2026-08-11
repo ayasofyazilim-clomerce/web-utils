@@ -3,6 +3,7 @@ export type Awaitable<T> = T | PromiseLike<T>;
 
 import { AdapterUser } from "@auth/core/adapters";
 import NextAuth, { AuthError, NextAuthResult } from "next-auth";
+import { basename } from "node:path";
 import {
   fetchNewAccessTokenByRefreshToken,
   fetchToken,
@@ -112,6 +113,11 @@ async function resolveAccessToken(sub: string | undefined) {
   return refreshPromise;
 }
 
+// Next runs each app from its own directory, so this is "ssr" or "web". Both apps
+// share this config and the same localhost host in dev, and cookies ignore ports -
+// without distinct names a login in one shows up as a login in the other.
+const APP_COOKIE_PREFIX = basename(process.cwd());
+
 const result = NextAuth({
   providers: [
     Credentials({
@@ -205,6 +211,11 @@ const result = NextAuth({
     signOut: process.env.LOGIN_ROUTE?.startsWith("/")
       ? process.env.LOGIN_ROUTE
       : `/${process.env.LOGIN_ROUTE || "login"}`,
+  },
+  cookies: {
+    sessionToken: { name: `${APP_COOKIE_PREFIX}.authjs.session-token` },
+    callbackUrl: { name: `${APP_COOKIE_PREFIX}.authjs.callback-url` },
+    csrfToken: { name: `${APP_COOKIE_PREFIX}.authjs.csrf-token` },
   },
   session: { strategy: "jwt" },
   callbacks: {
