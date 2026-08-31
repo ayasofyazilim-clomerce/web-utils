@@ -3,6 +3,7 @@
 import { AccountServiceClient } from "@repo/core-saas/AccountService";
 import { redirect } from "next/navigation";
 import { auth, deleteTokenCache, setTokenCache, signOut } from "./auth";
+import { buildUserData } from "./user-claims";
 
 const TOKEN_URL = `${process.env.GATEWAY_URL}/connect/token`;
 const OPENID_URL = `${process.env.GATEWAY_URL}/.well-known/openid-configuration`;
@@ -120,28 +121,7 @@ export async function getUserData(
   refresh_token: string,
   expiration_date: number
 ) {
-  const decoded_jwt = JSON.parse(
-    Buffer.from(access_token.split(".")[1] || "", "base64").toString()
-  );
-  return {
-    refresh_token,
-    expiration_date,
-    userName: decoded_jwt.unique_name,
-    name: decoded_jwt.given_name,
-    surname: decoded_jwt.family_name ?? "",
-    email: decoded_jwt.email,
-    sub: decoded_jwt.sub,
-    role: decoded_jwt.role,
-    CustomsId: decoded_jwt.CustomsId,
-    MerchantId: decoded_jwt.MerchantId,
-    RefundPointId: decoded_jwt.RefundPointId,
-    TaxFreeId: decoded_jwt.TaxFreeId,
-    TaxOfficeId: decoded_jwt.TaxOfficeId,
-    TourGuideId: decoded_jwt.TourGuideId,
-    TravellerId: decoded_jwt.TravellerId,
-    TravellerDocumentId: decoded_jwt.TravellerDocumentId,
-    PartyLevel: decoded_jwt.PartyLevel,
-  };
+  return buildUserData(access_token, refresh_token, expiration_date);
 }
 
 /**
