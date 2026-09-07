@@ -4,6 +4,7 @@ import type {
   CountryInfo,
   RawApplicationConfiguration,
 } from "./types";
+import type { Policies } from "../policies/types";
 
 const DEFAULT_CURRENCY = "USD";
 const DEFAULT_TIME_ZONE = "UTC";
@@ -29,7 +30,10 @@ export const EMPTY_APPLICATION_CONFIGURATION: ApplicationConfiguration = {
     countryName: null,
   }),
   timeZone: DEFAULT_TIME_ZONE,
-  policies: Object.freeze({}),
+  // Empty is never a real, fully-granted policy map; it is the fail-closed
+  // default. Same trust-boundary cast as below, applied to "no data" instead
+  // of "partial data".
+  policies: Object.freeze({}) as Policies,
   settings: Object.freeze({}),
   features: Object.freeze({}),
 };
@@ -100,7 +104,12 @@ export function normalizeApplicationConfiguration(
       raw.timing?.timeZone?.iana?.timeZoneName ||
       countryInfo?.timeZone ||
       DEFAULT_TIME_ZONE,
-    policies: raw.auth?.grantedPolicies ?? {},
+    // The payload carries only the GRANTED policies, so it is a partial map, while
+    // `Policies` describes the full key space from policies.json. Casting here — at
+    // the single point where untyped ABP JSON enters the typed domain — is what keeps
+    // every consumer cast-free. `isActionGranted` reads it with `?.[policy]`, so a
+    // missing key is correctly falsy rather than a crash.
+    policies: (raw.auth?.grantedPolicies ?? {}) as Policies,
     settings: raw.setting?.values ?? {},
     features: raw.features?.values ?? {},
   };

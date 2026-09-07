@@ -4,6 +4,7 @@ import type {
 import type {
   UniRefund_AdministrationService_CountrySettings_CountrySettingInfoDto,
 } from "@repo/core-saas/AdministrationService";
+import type { Policies } from "../policies/types";
 
 export type RawApplicationConfiguration =
   Volo_Abp_AspNetCore_Mvc_ApplicationConfigurations_ApplicationConfigurationDto;
@@ -45,7 +46,7 @@ export interface ApplicationConfiguration {
   country: ApplicationConfigurationCountry;
   /** IANA, e.g. "Europe/London". Never a Windows zone id. */
   timeZone: string;
-  policies: Record<string, boolean>;
+  policies: Policies;
   settings: Record<string, string | null>;
   features: Record<string, string | null>;
 }
