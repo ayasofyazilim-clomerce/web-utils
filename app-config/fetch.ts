@@ -22,31 +22,41 @@ import {
  * The two requests are independent: `Promise.allSettled` means a country
  * lookup failure leaves policies intact, and an application-configuration
  * failure still fails closed with an empty policy map.
+ *
+ * The outer try/catch is a second, blanket fail-closed guard: `auth()` and
+ * client construction sit outside the `Promise.allSettled`, so a failure
+ * there (e.g. session-cookie decryption) would otherwise reject the
+ * `cache()`-memoized promise instead of resolving to the empty config, and
+ * neither `getGrantedPoliciesApi()` nor `isUnauthorized` catches.
  */
 export const getApplicationConfiguration = cache(
   async (): Promise<ApplicationConfiguration> => {
-    const session = await auth();
-    if (!session) return EMPTY_APPLICATION_CONFIGURATION;
+    try {
+      const session = await auth();
+      if (!session) return EMPTY_APPLICATION_CONFIGURATION;
 
-    const client = await getAccountServiceClient(session.user?.access_token);
+      const client = await getAccountServiceClient(session.user?.access_token);
 
-    const [configResult, countryResult] = await Promise.allSettled([
-      // `includeLocalizationResources: false` keeps this at 19 KB / ~225 ms
-      // instead of 397 KB / ~900 ms, on every render of the (main) layout.
-      client.abpApplicationConfiguration.getApiAbpApplicationConfiguration({
-        includeLocalizationResources: false,
-      }),
-      getCountryInfo(session.user?.access_token),
-    ]);
+      const [configResult, countryResult] = await Promise.allSettled([
+        // `includeLocalizationResources: false` keeps this at 19 KB / ~225 ms
+        // instead of 397 KB / ~900 ms, on every render of the (main) layout.
+        client.abpApplicationConfiguration.getApiAbpApplicationConfiguration({
+          includeLocalizationResources: false,
+        }),
+        getCountryInfo(session.user?.access_token),
+      ]);
 
-    if (configResult.status === "rejected") {
+      if (configResult.status === "rejected") {
+        return EMPTY_APPLICATION_CONFIGURATION;
+      }
+
+      return normalizeApplicationConfiguration(
+        configResult.value,
+        countryResult.status === "fulfilled" ? countryResult.value : undefined,
+      );
+    } catch {
       return EMPTY_APPLICATION_CONFIGURATION;
     }
-
-    return normalizeApplicationConfiguration(
-      configResult.value,
-      countryResult.status === "fulfilled" ? countryResult.value : undefined,
-    );
   },
 );
 
