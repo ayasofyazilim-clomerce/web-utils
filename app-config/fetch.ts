@@ -12,6 +12,21 @@ import {
 } from "./logic";
 
 /**
+ * Server-only: never import this from a client component.
+ *
+ * Deliberately no `import "server-only"` guard here, unlike
+ * `apps/web/src/language-data/get-translations.ts` and its ssr counterpart.
+ * `../api/action.ts` imports this module and re-exports it through the
+ * `@repo/utils/api` barrel, which `apps/web`'s `test:unit`
+ * (`node --import tsx --test`) reaches transitively from
+ * `resolve-tenant-names.test.ts`; that runner can't resolve the
+ * `server-only` specifier, which only Next's bundler provides, so the guard
+ * fails that gate. The boundary holds anyway: a client bundle already fails
+ * on this module, since it pulls in `node:path` and, via `../auth/auth`,
+ * `ioredis`. Revisit if the session/token-store chain ever becomes
+ * isomorphic — that incidental protection would lapse, and this would need
+ * an explicit guard plus a `test:unit` fix.
+ *
  * The session's application configuration, fetched at most once per request.
  *
  * `cache()` is load-bearing, not an optimisation. Of 135 `isUnauthorized(...)`
