@@ -11,8 +11,9 @@
  * "00000000-0000-0000-0000-000000000000"` with `tenantName: null`.
  *
  * Null, undefined and "" are also treated as host: the login form submits an
- * empty `__tenant` when no tenant is chosen, and `TenantContext` defaults the
- * field to "".
+ * empty `__tenant` when no tenant is chosen, and `useTenant`'s `?? ""`
+ * normalization defaults the field to "" when the configuration has no
+ * tenant id.
  *
  * This lives in its own module, free of server imports, so the client nav,
  * the server route guard and the app-config normalizer can share one

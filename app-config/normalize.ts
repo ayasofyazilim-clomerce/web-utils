@@ -72,16 +72,20 @@ export function normalizeApplicationConfiguration(
       isHost: isHostTenant(tenantId),
     },
     country: {
-      currency: countryInfo?.currency ?? DEFAULT_CURRENCY,
+      // `||`, not `??`: an empty string from either source must still fall
+      // through to the default, not reach `Intl.DateTimeFormat`/formatters
+      // as `""`.
+      currency: countryInfo?.currency || DEFAULT_CURRENCY,
       countryCode2: countryInfo?.countryCode2 ?? null,
       countryCode3: countryInfo?.countryCode3 ?? null,
       countryName: countryInfo?.countryName ?? null,
     },
     // The IANA zone. `setting.values["Abp.Timing.TimeZone"]` is a Windows id
-    // and `Intl.DateTimeFormat` throws on it.
+    // and `Intl.DateTimeFormat` throws on it. `||`, not `??`: an empty string
+    // is a real value the backend can send and must not survive to `Intl`.
     timeZone:
-      raw.timing?.timeZone?.iana?.timeZoneName ??
-      countryInfo?.timeZone ??
+      raw.timing?.timeZone?.iana?.timeZoneName ||
+      countryInfo?.timeZone ||
       DEFAULT_TIME_ZONE,
     policies: (raw.auth?.grantedPolicies ?? {}) as Record<string, boolean>,
     settings: raw.setting?.values ?? {},

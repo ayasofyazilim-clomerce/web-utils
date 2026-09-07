@@ -1,6 +1,5 @@
 "use client";
 import { useApplicationConfiguration } from "@repo/utils/app-config";
-import policies from "./policies.json";
 import { Policies } from "./types";
 
 import type { ReactNode } from "react";
@@ -21,6 +20,7 @@ export function GrantedPoliciesProvider({
   children,
 }: {
   children: ReactNode;
+  /** @deprecated Ignored; the configuration provider is the source. */
   grantedPolicies?: Policies | undefined;
 }) {
   return <>{children}</>;
