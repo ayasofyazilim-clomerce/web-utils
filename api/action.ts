@@ -1,21 +1,15 @@
 "use server";
-import { getAccountServiceClient } from "../auth/auth-actions";
-import { auth } from "../auth/auth";
+import { getApplicationConfiguration } from "../app-config/fetch";
 import { Policies } from "../policies/types";
+
+/**
+ * Kept for its ~130 existing callers. Reads the request-cached application
+ * configuration rather than issuing its own round-trip.
+ *
+ * Prefer `useApplicationConfiguration()` in client code and
+ * `getApplicationConfiguration()` on the server for anything new.
+ */
 export async function getGrantedPoliciesApi() {
-  try {
-    const session = await auth();
-    const client = await getAccountServiceClient(session?.user?.access_token);
-    // We only read grantedPolicies here. Leaving the localization resources in
-    // makes this a 397 KB / ~900 ms call instead of 19 KB / ~225 ms, on every
-    // render of the (main) layout.
-    const response =
-      await client.abpApplicationConfiguration.getApiAbpApplicationConfiguration(
-        { includeLocalizationResources: false }
-      );
-    const grantedPolicies = response.auth?.grantedPolicies;
-    return grantedPolicies as Policies;
-  } catch (error) {
-    return undefined;
-  }
+  const config = await getApplicationConfiguration();
+  return config.policies as Policies;
 }

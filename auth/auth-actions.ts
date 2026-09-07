@@ -1,6 +1,7 @@
 "use server";
 
 import { AccountServiceClient } from "@repo/core-saas/AccountService";
+import { AdministrationServiceClient } from "@repo/core-saas/AdministrationService";
 import { redirect } from "next/navigation";
 import { auth, deleteTokenCache, setTokenCache, signOut } from "./auth";
 import { buildUserData } from "./user-claims";
@@ -14,6 +15,14 @@ const HEADERS = {
 
 export async function getAccountServiceClient(accessToken?: string) {
   return new AccountServiceClient({
+    TOKEN: accessToken,
+    BASE: process.env.GATEWAY_URL,
+    HEADERS: HEADERS,
+  });
+}
+
+export async function getAdministrationServiceClient(accessToken?: string) {
+  return new AdministrationServiceClient({
     TOKEN: accessToken,
     BASE: process.env.GATEWAY_URL,
     HEADERS: HEADERS,

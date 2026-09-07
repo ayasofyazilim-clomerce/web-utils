@@ -1,7 +1,7 @@
 "use server";
 import { permanentRedirect, RedirectType } from "next/navigation";
 import { Policy } from "./types";
-import { getGrantedPoliciesApi } from "../api/action";
+import { getApplicationConfiguration } from "../app-config/fetch";
 export async function isUnauthorized({
   requiredPolicies,
   lang,
@@ -14,7 +14,7 @@ export async function isUnauthorized({
   grantedPolicies?: Record<string, boolean> | null;
 }) {
   const grantedPolicies =
-    initalGrantedPolicies || (await getGrantedPoliciesApi());
+    initalGrantedPolicies ?? (await getApplicationConfiguration()).policies;
   const missingPolicies = requiredPolicies.filter(
     (policy) => !grantedPolicies?.[policy]
   );
