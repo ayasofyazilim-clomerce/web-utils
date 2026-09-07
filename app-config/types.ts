@@ -46,6 +46,12 @@ export interface ApplicationConfiguration {
   country: ApplicationConfigurationCountry;
   /** IANA, e.g. "Europe/London". Never a Windows zone id. */
   timeZone: string;
+  /**
+   * Only the granted subset, even though `Policies` structurally describes
+   * the full key space. Read it through `isActionGranted` / `isUnauthorized`,
+   * never by indexing a key directly — an unindexed key isn't a type error,
+   * it's just missing.
+   */
   policies: Policies;
   settings: Record<string, string | null>;
   features: Record<string, string | null>;
