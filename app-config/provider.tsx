@@ -27,6 +27,10 @@ const ApplicationConfigurationContext = createContext<ApplicationConfiguration>(
 export const useApplicationConfiguration = () =>
   useContext(ApplicationConfigurationContext);
 
+/**
+ * Carries only the route's `lang`; everything else comes from the
+ * configuration.
+ */
 const LangContext = createContext<string>("en");
 
 export function ApplicationConfigurationProvider({
@@ -54,7 +58,7 @@ export function ApplicationConfigurationProvider({
 }
 
 /**
- * What 109 of the 122 former `useTenant` consumers actually wanted.
+ * What 109 of the 121 former `useTenant` consumers actually wanted.
  * `lang` is a route segment, not configuration, which is why it rides a
  * separate context rather than being folded into the contract.
  */
@@ -75,6 +79,9 @@ export function useLocalization(): Localization {
  * Flat tenant accessors. Centralizes the `?? ""` null-to-empty-string
  * normalization `useTenant` used to apply, so it lives in one place instead
  * of being repeated at every call site.
+ *
+ * No `timeZone`: nothing needed it here. Read the tenant's zone from
+ * `useLocalization().timeZone`.
  */
 export function useTenantInfo() {
   const { tenant } = useApplicationConfiguration();
@@ -107,10 +114,8 @@ export function useCountryInfo() {
 }
 
 /**
- * Thin wrappers over `formatToLocalizedDate` closing over `localization`.
- * `formatToTenantDate` pins the tenant's own time zone; `formatToTimezoneDate`
- * passes the caller's `timeZone` straight through, so an omitted value still
- * means the system zone — do not default it to the tenant zone here.
+ * Thin wrapper over `formatToLocalizedDate` closing over `localization`.
+ * `formatToTenantDate` pins the tenant's own time zone.
  */
 export function useTenantDateFormatters() {
   const localization = useLocalization();
@@ -126,11 +131,6 @@ export function useTenantDateFormatters() {
           localization,
           timeZone: localization.timeZone,
         }),
-      formatToTimezoneDate: (
-        date: string | Date,
-        timeZone?: string,
-        dateOptions?: Intl.DateTimeFormatOptions,
-      ) => formatToLocalizedDate({ date, dateOptions, localization, timeZone }),
     }),
     [localization],
   );

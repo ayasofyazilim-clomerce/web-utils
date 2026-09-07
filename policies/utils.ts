@@ -11,7 +11,7 @@ export async function isUnauthorized({
   requiredPolicies: Policy[];
   lang: string;
   redirect?: boolean;
-  grantedPolicies?: Record<string, boolean> | null;
+  grantedPolicies?: Record<string, boolean | undefined> | null;
 }) {
   const grantedPolicies =
     initalGrantedPolicies ?? (await getApplicationConfiguration()).policies;

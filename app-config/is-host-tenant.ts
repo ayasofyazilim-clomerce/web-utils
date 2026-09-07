@@ -11,7 +11,7 @@
  * "00000000-0000-0000-0000-000000000000"` with `tenantName: null`.
  *
  * Null, undefined and "" are also treated as host: the login form submits an
- * empty `__tenant` when no tenant is chosen, and `useTenant`'s `?? ""`
+ * empty `__tenant` when no tenant is chosen, and `useTenantInfo`'s `?? ""`
  * normalization defaults the field to "" when the configuration has no
  * tenant id.
  *

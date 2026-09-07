@@ -47,12 +47,14 @@ export interface ApplicationConfiguration {
   /** IANA, e.g. "Europe/London". Never a Windows zone id. */
   timeZone: string;
   /**
-   * Only the granted subset, even though `Policies` structurally describes
-   * the full key space. Read it through `isActionGranted` / `isUnauthorized`,
-   * never by indexing a key directly — an unindexed key isn't a type error,
-   * it's just missing.
+   * Holds only the granted policies. A key that is absent is a policy that is
+   * not granted, so `Partial` is the honest shape: `Policies` is a mapped type
+   * over every key in policies.json and would claim all of them are present.
+   * The `Policy` union still does the useful work — an unknown or misspelled
+   * policy name is a type error. Read this through `isActionGranted` /
+   * `isUnauthorized` rather than indexing a key directly.
    */
-  policies: Policies;
+  policies: Partial<Policies>;
   settings: Record<string, string | null>;
   features: Record<string, string | null>;
 }

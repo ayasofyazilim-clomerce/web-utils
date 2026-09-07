@@ -1,6 +1,5 @@
 "use server";
 import { getApplicationConfiguration } from "../app-config/fetch";
-import { Policies } from "../policies/types";
 
 /**
  * Kept for its ~130 existing callers. Reads the request-cached application
@@ -11,5 +10,5 @@ import { Policies } from "../policies/types";
  */
 export async function getGrantedPoliciesApi() {
   const config = await getApplicationConfiguration();
-  return config.policies as Policies;
+  return config.policies;
 }

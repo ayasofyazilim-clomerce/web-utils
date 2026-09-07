@@ -40,14 +40,9 @@ import {
  *
  * The session's application configuration, fetched at most once per request.
  *
- * `cache()` is load-bearing, not an optimisation. Of 135 `isUnauthorized(...)`
- * call sites only 8 pass `grantedPolicies`; the rest each triggered their own
- * 19 KB / ~225 ms round-trip on top of the layout's. Next renders one page
- * plus its layout chain, not every call site: before this cache, a typical
- * route made 2 application-configuration requests (the page's own
- * `isUnauthorized` plus `Providers`) and now makes 1; the worst route,
- * `operations/tax-free-tags/[tagId]/page.tsx` with 9 call sites of its own,
- * made 11 and now makes 1.
+ * `cache()` is load-bearing, not an optimisation: most `isUnauthorized(...)`
+ * call sites do not pass `grantedPolicies`, so without it each one issues its
+ * own round-trip on top of the layout's.
  *
  * The two requests are independent: `Promise.allSettled` means a country
  * lookup failure leaves policies intact, and an application-configuration
