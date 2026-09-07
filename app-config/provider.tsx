@@ -1,5 +1,6 @@
 "use client";
 
+import { formatToLocalizedDate } from "@repo/ayasofyazilim-ui/custom/date-tooltip";
 import {
   createContext,
   useContext,
@@ -67,5 +68,70 @@ export function useLocalization(): Localization {
       lang,
     }),
     [config.country.countryCode2, config.timeZone, lang],
+  );
+}
+
+/**
+ * Flat tenant accessors. Centralizes the `?? ""` null-to-empty-string
+ * normalization `useTenant` used to apply, so it lives in one place instead
+ * of being repeated at every call site.
+ */
+export function useTenantInfo() {
+  const { tenant } = useApplicationConfiguration();
+  return useMemo(
+    () => ({
+      tenantId: tenant.id ?? "",
+      tenantName: tenant.name ?? "",
+      isHost: tenant.isHost,
+      isAvailable: tenant.isAvailable,
+    }),
+    [tenant],
+  );
+}
+
+/**
+ * Flat country accessors. `currency` deliberately has no `?? ""` — the
+ * contract types it as a non-nullable string with a default.
+ */
+export function useCountryInfo() {
+  const { country } = useApplicationConfiguration();
+  return useMemo(
+    () => ({
+      currency: country.currency,
+      countryCode2: country.countryCode2 ?? "",
+      countryCode3: country.countryCode3 ?? "",
+      countryName: country.countryName ?? "",
+    }),
+    [country],
+  );
+}
+
+/**
+ * Thin wrappers over `formatToLocalizedDate` closing over `localization`.
+ * `formatToTenantDate` pins the tenant's own time zone; `formatToTimezoneDate`
+ * passes the caller's `timeZone` straight through, so an omitted value still
+ * means the system zone — do not default it to the tenant zone here.
+ */
+export function useTenantDateFormatters() {
+  const localization = useLocalization();
+  return useMemo(
+    () => ({
+      formatToTenantDate: (
+        date: string | Date,
+        dateOptions?: Intl.DateTimeFormatOptions,
+      ) =>
+        formatToLocalizedDate({
+          date,
+          dateOptions,
+          localization,
+          timeZone: localization.timeZone,
+        }),
+      formatToTimezoneDate: (
+        date: string | Date,
+        timeZone?: string,
+        dateOptions?: Intl.DateTimeFormatOptions,
+      ) => formatToLocalizedDate({ date, dateOptions, localization, timeZone }),
+    }),
+    [localization],
   );
 }
