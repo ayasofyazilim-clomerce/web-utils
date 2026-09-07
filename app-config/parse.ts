@@ -27,8 +27,8 @@ export function getNumberSetting(
   key: string,
   fallback: number,
 ): number {
-  const raw = values[key];
-  if (raw === null || raw === undefined) return fallback;
+  const raw = values[key]?.trim();
+  if (!raw) return fallback;
   const parsed = Number(raw);
   return Number.isNaN(parsed) ? fallback : parsed;
 }

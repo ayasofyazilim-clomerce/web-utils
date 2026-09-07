@@ -16,23 +16,38 @@ import {
  *
  * Deliberately no `import "server-only"` guard here, unlike
  * `apps/web/src/language-data/get-translations.ts` and its ssr counterpart.
- * `../api/action.ts` imports this module and re-exports it through the
- * `@repo/utils/api` barrel, which `apps/web`'s `test:unit`
- * (`node --import tsx --test`) reaches transitively from
- * `resolve-tenant-names.test.ts`; that runner can't resolve the
+ * The durable reason is structural, not incidental: the only paths from
+ * client code to this module go through `../api/action.ts` and
+ * `../policies/utils.ts`, both marked `"use server"`, so Next replaces their
+ * bodies with action references and never bundles their imports into a
+ * client chunk. `app-config/index.tsx`, the barrel every client component
+ * imports, re-exports only `./logic` and `./provider`, both pure. That
+ * leaves exactly one unguarded door: a client component explicitly importing
+ * `@repo/utils/app-config/fetch` — a narrow, greppable mistake.
+ *
+ * Secondarily, a client bundle would also fail on this module today since it
+ * pulls in `node:path` and, via `../auth/auth`, `ioredis` — but that's
+ * incidental, not the argument to lean on, since it could lapse. An explicit
+ * `import "server-only"` guard isn't used instead because `../api/action.ts`
+ * re-exports this module through the `@repo/utils/api` barrel, which
+ * `apps/web`'s `test:unit` (`node --import tsx --test`) reaches transitively
+ * from `resolve-tenant-names.test.ts`; that runner can't resolve the
  * `server-only` specifier, which only Next's bundler provides, so the guard
- * fails that gate. The boundary holds anyway: a client bundle already fails
- * on this module, since it pulls in `node:path` and, via `../auth/auth`,
- * `ioredis`. Revisit if the session/token-store chain ever becomes
- * isomorphic — that incidental protection would lapse, and this would need
- * an explicit guard plus a `test:unit` fix.
+ * fails that gate. Revisit if the session/token-store chain ever becomes
+ * isomorphic, or the barrel starts re-exporting this module directly — the
+ * structural argument above would no longer hold, and this would need an
+ * explicit guard plus a `test:unit` fix.
  *
  * The session's application configuration, fetched at most once per request.
  *
  * `cache()` is load-bearing, not an optimisation. Of 135 `isUnauthorized(...)`
  * call sites only 8 pass `grantedPolicies`; the rest each triggered their own
- * 19 KB / ~225 ms round-trip on top of the layout's. Without the cache this is
- * ~128 calls per page render.
+ * 19 KB / ~225 ms round-trip on top of the layout's. Next renders one page
+ * plus its layout chain, not every call site: before this cache, a typical
+ * route made 2 application-configuration requests (the page's own
+ * `isUnauthorized` plus `Providers`) and now makes 1; the worst route,
+ * `operations/tax-free-tags/[tagId]/page.tsx` with 9 call sites of its own,
+ * made 11 and now makes 1.
  *
  * The two requests are independent: `Promise.allSettled` means a country
  * lookup failure leaves policies intact, and an application-configuration

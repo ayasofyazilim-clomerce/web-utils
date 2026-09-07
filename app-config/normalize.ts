@@ -9,7 +9,7 @@ const DEFAULT_CURRENCY = "USD";
 const DEFAULT_TIME_ZONE = "UTC";
 
 export const EMPTY_APPLICATION_CONFIGURATION: ApplicationConfiguration = {
-  user: {
+  user: Object.freeze({
     isAuthenticated: false,
     id: null,
     userName: null,
@@ -20,19 +20,20 @@ export const EMPTY_APPLICATION_CONFIGURATION: ApplicationConfiguration = {
     phoneNumber: null,
     roles: [],
     sessionId: null,
-  },
-  tenant: { id: null, name: null, isAvailable: false, isHost: true },
-  country: {
+  }),
+  tenant: Object.freeze({ id: null, name: null, isAvailable: false, isHost: true }),
+  country: Object.freeze({
     currency: DEFAULT_CURRENCY,
     countryCode2: null,
     countryCode3: null,
     countryName: null,
-  },
+  }),
   timeZone: DEFAULT_TIME_ZONE,
-  policies: {},
-  settings: {},
-  features: {},
+  policies: Object.freeze({}),
+  settings: Object.freeze({}),
+  features: Object.freeze({}),
 };
+Object.freeze(EMPTY_APPLICATION_CONFIGURATION);
 
 /**
  * Projects the raw ABP payload onto the app's contract.
@@ -83,11 +84,23 @@ export function normalizeApplicationConfiguration(
     // The IANA zone. `setting.values["Abp.Timing.TimeZone"]` is a Windows id
     // and `Intl.DateTimeFormat` throws on it. `||`, not `??`: an empty string
     // is a real value the backend can send and must not survive to `Intl`.
+    //
+    // Deliberate precedence change from the previous, country-settings-only
+    // behaviour: ABP's `timing.timeZone.iana.timeZoneName` now wins, falling
+    // back to `countryInfo.timeZone`. Both are documented IANA sources
+    // (`CountrySettingInfoDto.timeZone` is documented as IANA in the
+    // generated types) and the backend keeps them in sync — its own error
+    // `UniRefund.AdministrationService:010016` states `Abp.Timing.TimeZone`
+    // cannot be set directly and is derived from
+    // `CountryManagement.MainSettings.IANATimezone`. Note the ABP path
+    // round-trips IANA → Windows → IANA, which is not injective, so a tenant
+    // whose Windows zone maps to several IANA zones could in principle
+    // resolve to the primary rather than the configured one.
     timeZone:
       raw.timing?.timeZone?.iana?.timeZoneName ||
       countryInfo?.timeZone ||
       DEFAULT_TIME_ZONE,
-    policies: (raw.auth?.grantedPolicies ?? {}) as Record<string, boolean>,
+    policies: raw.auth?.grantedPolicies ?? {},
     settings: raw.setting?.values ?? {},
     features: raw.features?.values ?? {},
   };
