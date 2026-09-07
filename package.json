@@ -4,6 +4,7 @@
   "description": "",
   "exports": {
     "./*": "./*/index.tsx",
+    "./app-config/logic": "./app-config/logic.ts",
     "./auth/next-auth": "./auth/auth.ts",
     "./auth/user-claims": "./auth/user-claims.ts",
     "./auth/middleware": "./auth/middleware.ts",
