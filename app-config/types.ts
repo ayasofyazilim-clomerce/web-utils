@@ -40,10 +40,18 @@ export interface ApplicationConfigurationCountry {
   countryName: string | null;
 }
 
+/** One enabled language: `cultureName` formats dates, `uiCultureName` translates. */
+export interface ApplicationConfigurationLanguage {
+  cultureName: string | null;
+  uiCultureName: string | null;
+}
+
 export interface ApplicationConfiguration {
   user: ApplicationConfigurationUser;
   tenant: ApplicationConfigurationTenant;
   country: ApplicationConfigurationCountry;
+  /** The tenant's enabled languages, from ABP's `localization.languages`. */
+  languages: ApplicationConfigurationLanguage[];
   /** IANA, e.g. "Europe/London". Never a Windows zone id. */
   timeZone: string;
   /**

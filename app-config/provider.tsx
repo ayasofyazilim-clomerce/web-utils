@@ -10,7 +10,7 @@ import {
 } from "react";
 import {
   EMPTY_APPLICATION_CONFIGURATION,
-  getLocaleFromCountryCode,
+  resolveLocalization,
   type ApplicationConfiguration,
   type Localization,
 } from "./logic";
@@ -65,14 +65,7 @@ export function ApplicationConfigurationProvider({
 export function useLocalization(): Localization {
   const config = useContext(ApplicationConfigurationContext);
   const lang = useContext(LangContext);
-  return useMemo(
-    () => ({
-      locale: getLocaleFromCountryCode(config.country.countryCode2 || "UK"),
-      timeZone: config.timeZone,
-      lang,
-    }),
-    [config.country.countryCode2, config.timeZone, lang],
-  );
+  return useMemo(() => resolveLocalization({ config, lang }), [config, lang]);
 }
 
 /**
