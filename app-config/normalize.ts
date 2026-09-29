@@ -1,4 +1,5 @@
 import { isHostTenant } from "./is-host-tenant";
+import { keepsRegionalConventions } from "./localization";
 import type {
   ApplicationConfiguration,
   CountryInfo,
@@ -28,6 +29,7 @@ export const EMPTY_APPLICATION_CONFIGURATION: ApplicationConfiguration = {
     countryCode3: null,
     countryName: null,
   }),
+  languages: [],
   timeZone: DEFAULT_TIME_ZONE,
   // The fail-closed default: no policy is granted when there is no data.
   policies: Object.freeze({}),
@@ -39,9 +41,9 @@ Object.freeze(EMPTY_APPLICATION_CONFIGURATION);
 /**
  * Projects the raw ABP payload onto the app's contract.
  *
- * Deliberately drops `objectExtensions`, `localization.*`, `globalFeatures`,
- * `clock` and `multiTenancy`: nothing consumes them, and `objectExtensions`
- * alone is the largest block in the response.
+ * Deliberately drops `objectExtensions`, `localization.*` (bar the language
+ * list), `globalFeatures`, `clock` and `multiTenancy`: nothing consumes them,
+ * and `objectExtensions` alone is the largest block in the response.
  *
  * `country` comes from a second endpoint because application-configuration
  * exposes none of `currency`, `countryCode2`, `countryCode3` or `countryName`.
@@ -82,6 +84,13 @@ export function normalizeApplicationConfiguration(
       countryCode3: countryInfo?.countryCode3 ?? null,
       countryName: countryInfo?.countryName ?? null,
     },
+    languages: (raw.localization?.languages ?? []).map((language) => ({
+      cultureName:
+        language.cultureName && keepsRegionalConventions(language.cultureName)
+          ? language.cultureName
+          : null,
+      uiCultureName: language.uiCultureName ?? null,
+    })),
     // The IANA zone. `setting.values["Abp.Timing.TimeZone"]` is a Windows id
     // and `Intl.DateTimeFormat` throws on it. `||`, not `??`: an empty string
     // is a real value the backend can send and must not survive to `Intl`.
