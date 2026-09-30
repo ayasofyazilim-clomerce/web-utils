@@ -170,7 +170,7 @@ const result = NextAuth({
     Credentials({
       id: "ssr-token",
       name: "SSR Token",
-      credentials: { accessToken: {}, expiresIn: {} },
+      credentials: { accessToken: {}, expiresIn: {}, refreshToken: {} },
       authorize: async (credentials) => {
         function authorizeError(message: string) {
           return Promise.reject(new AuthError(JSON.stringify(message)));
@@ -183,16 +183,19 @@ const result = NextAuth({
           const expirationDate =
             Number(credentials.expiresIn) * 1000 + Date.now();
 
+          const refreshToken =
+            typeof credentials.refreshToken === "string"
+              ? credentials.refreshToken
+              : "";
           const user_data = await getUserData(
             credentials.accessToken as string,
-            "", // SSR login doesn't provide refresh token
+            refreshToken,
             expirationDate
           );
-          // Cache the access token server-side (no refresh token for SSR)
           if (user_data.sub) {
             await setTokenCache(
               user_data.sub,
-              "",
+              refreshToken,
               credentials.accessToken as string,
               expirationDate
             );
