@@ -8,6 +8,7 @@
     "./app-config/fetch": "./app-config/fetch.ts",
     "./auth/next-auth": "./auth/auth.ts",
     "./auth/user-claims": "./auth/user-claims.ts",
+    "./auth/verify-ssr-token": "./auth/verify-ssr-token.ts",
     "./auth/middleware": "./auth/middleware.ts",
     "./helper-functions": "./helper-functions.ts"
   },
