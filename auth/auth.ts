@@ -17,6 +17,8 @@ import {
   TOKEN_REFRESH_BUFFER_MS,
   type TokenCacheEntry,
 } from "./token-store";
+import { buildUserData } from "./user-claims";
+import { verifySsrToken } from "./verify-ssr-token";
 
 // Server-side token store. Tokens NEVER live in the JWT cookie (that grows with
 // ABP claims and caused HTTP 431) - they live in token-store.ts: a per-instance
@@ -67,7 +69,8 @@ async function resolveAccessToken(sub: string | undefined) {
   const cached = await storeGet(sub);
   if (!cached) return null;
 
-  // SSR-token login: no refresh_token (empty string). Use it while still valid.
+  // No refresh token (e.g. an SSR-token login the backend gave none). Use it
+  // while still valid.
   if (!cached.refresh_token) {
     if (cached.expiresAt > Date.now() + TOKEN_REFRESH_BUFFER_MS) {
       return cached;
@@ -170,7 +173,7 @@ const result = NextAuth({
     Credentials({
       id: "ssr-token",
       name: "SSR Token",
-      credentials: { accessToken: {}, expiresIn: {} },
+      credentials: { accessToken: {}, expiresIn: {}, refreshToken: {} },
       authorize: async (credentials) => {
         function authorizeError(message: string) {
           return Promise.reject(new AuthError(JSON.stringify(message)));
@@ -183,17 +186,29 @@ const result = NextAuth({
           const expirationDate =
             Number(credentials.expiresIn) * 1000 + Date.now();
 
-          const user_data = await getUserData(
-            credentials.accessToken as string,
-            "", // SSR login doesn't provide refresh token
+          const refreshToken =
+            typeof credentials.refreshToken === "string"
+              ? credentials.refreshToken
+              : "";
+          const accessToken = credentials.accessToken as string;
+          const { sub } = buildUserData(
+            accessToken,
+            refreshToken,
             expirationDate
           );
-          // Cache the access token server-side (no refresh token for SSR)
+          if (!(await verifySsrToken(accessToken, sub))) {
+            return authorizeError("Invalid SSR token");
+          }
+          const user_data = await getUserData(
+            accessToken,
+            refreshToken,
+            expirationDate
+          );
           if (user_data.sub) {
             await setTokenCache(
               user_data.sub,
-              "",
-              credentials.accessToken as string,
+              refreshToken,
+              accessToken,
               expirationDate
             );
           }
