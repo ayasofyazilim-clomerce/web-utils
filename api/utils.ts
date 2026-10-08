@@ -20,7 +20,7 @@ export function isThrowedError(
 export function structuredError(error: unknown): ApiErrorServerResponse {
   if (isApiError(error)) {
     const body = error.body as
-      | { error: { message?: string; details?: string } }
+      | { error: { message?: string; details?: string; code?: string | null } }
       | undefined;
     const errorDetails = body?.error || {};
     return {
@@ -32,6 +32,7 @@ export function structuredError(error: unknown): ApiErrorServerResponse {
         error.statusText ||
         "Something went wrong",
       status: error.status,
+      ...(errorDetails.code ? { code: errorDetails.code } : {}),
     };
   }
   if (isThrowedError(error)) {

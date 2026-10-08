@@ -17,6 +17,10 @@ export interface ApiErrorServerResponse {
   // reliably distinguish auth failures (401) / forbidden (403) from other
   // errors without string-matching on the message.
   status?: number;
+  // The backend's error code (for example `UniRefund.CRMService:029001`), when
+  // the response carried one. Lets callers branch on a specific failure without
+  // matching a localized message.
+  code?: string;
 }
 
 export type ServerResponse<T> =
