@@ -49,6 +49,10 @@ function getLocale(request: NextRequest) {
 }
 function isUserAuthorized(request: NextAuthRequest) {
   const user = request.auth?.user as MyUser;
+  // The cookie outlives the server-side tokens (an expired refresh token, a
+  // store that lost the entry). Without a token every backend call is anonymous
+  // and pages render with no permissions, so treat that as signed out.
+  if (!user?.access_token) return false;
   if (isAdminPanel) {
     return Boolean(user?.role === "admin" && (user.userName || user.email));
   }
