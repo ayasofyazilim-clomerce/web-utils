@@ -123,7 +123,18 @@ export async function storeGet(sub: string): Promise<TokenCacheEntry | null> {
   }
 }
 
-/** Write to L1 immediately and to Redis with a TTL matching the token lifetime. */
+/**
+ * How long Redis keeps an entry. It must outlive the access token: the entry
+ * also carries the refresh token, which is only ever used after the access
+ * token has expired. Each refresh rewrites the entry, so this is a sliding
+ * window of inactivity. Defaults to OpenIddict's 14-day refresh token lifetime.
+ */
+const ENTRY_TTL_MS =
+  Number(process.env.AUTH_REDIS_TTL_MS) > 0
+    ? Number(process.env.AUTH_REDIS_TTL_MS)
+    : 14 * 24 * 60 * 60 * 1000;
+
+/** Write to L1 immediately and to Redis for ENTRY_TTL_MS. */
 export async function storeSet(
   sub: string,
   entry: TokenCacheEntry
@@ -132,8 +143,7 @@ export async function storeSet(
   const client = redis();
   if (!client) return;
   try {
-    const ttlMs = Math.max(entry.expiresAt - Date.now(), 60_000);
-    await client.set(key(sub), JSON.stringify(entry), "PX", Math.ceil(ttlMs));
+    await client.set(key(sub), JSON.stringify(entry), "PX", ENTRY_TTL_MS);
   } catch {
     // L1 already updated; a later successful write reconciles Redis.
   }
