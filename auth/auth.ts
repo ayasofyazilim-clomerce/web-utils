@@ -261,13 +261,28 @@ const result = NextAuth({
       // to support specialized path-based logic ((auth), (public), (main) groups).
       return true;
     },
-    async jwt({ token, trigger, session, user }) {
+    async jwt({ token, trigger, user }) {
       if (user) {
         token.user = user;
       }
-      if (trigger === "update") {
-        if (session.info) {
-          token.user = { ...(token.user as object), ...session.info };
+      // An update request's body comes from the browser, so nothing in it is
+      // trusted: `session.info` could carry another user's `sub` (whose tokens
+      // the session callback would then load) or a forged role. Callers write
+      // fresh tokens to the store first (refreshSessionAfterAffiliationSwitch),
+      // so re-read the claims from this cookie's own stored token instead.
+      if (trigger === "update" && token.user) {
+        const sub = (token.user as MyUser).sub;
+        const cached = await resolveAccessToken(sub);
+        if (cached) {
+          token.user = {
+            ...(token.user as object),
+            ...buildUserData(
+              cached.access_token,
+              cached.refresh_token,
+              cached.expiresAt
+            ),
+            sub,
+          };
         }
       }
       // Strip ALL tokens from the cookie - they live in the server-side cache only.
