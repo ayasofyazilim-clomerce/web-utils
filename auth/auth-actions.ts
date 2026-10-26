@@ -4,6 +4,7 @@ import { AccountServiceClient } from "@repo/core-saas/AccountService";
 import { AdministrationServiceClient } from "@repo/core-saas/AdministrationService";
 import { redirect } from "next/navigation";
 import { auth, deleteTokenCache, setTokenCache, signOut } from "./auth";
+import { storeGet } from "./token-store";
 import { buildUserData } from "./user-claims";
 
 const TOKEN_URL = `${process.env.GATEWAY_URL}/connect/token`;
@@ -142,7 +143,7 @@ export async function refreshSessionAfterAffiliationSwitch() {
   const session = await auth();
   const user = session?.user as Record<string, string> | undefined;
   const sub = user?.sub;
-  const refreshToken = user?.refresh_token;
+  const refreshToken = sub ? (await storeGet(sub))?.refresh_token : undefined;
   if (!refreshToken) {
     throw new Error("No refresh token available");
   }
@@ -163,11 +164,12 @@ export async function refreshSessionAfterAffiliationSwitch() {
     );
   }
 
-  // Return user data extracted from the new access_token (for session update)
-  const userData = await getUserData(
+  // Claims only: this goes back to the browser, so the new refresh token
+  // stays in the store written above.
+  const { refresh_token: _refreshToken, ...claims } = await getUserData(
     result.access_token,
     result.refresh_token,
     expiresAt
   );
-  return userData;
+  return claims;
 }

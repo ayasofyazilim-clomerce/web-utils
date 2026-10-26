@@ -245,12 +245,14 @@ const result = NextAuth({
         const tokenUser = token.user as AdapterUser & MyUser;
         const sessionUser = { ...tokenUser } as AdapterUser & MyUser;
 
-        // Tokens live only in the server-side cache, not in the cookie.
+        // Tokens live only in the server-side cache, not in the cookie. The
+        // refresh token stays there too: this object also reaches the browser
+        // (SessionProvider, /api/auth/session), and only the server refreshes.
         const cached = await resolveAccessToken(tokenUser.sub);
         if (cached) {
           sessionUser.access_token = cached.access_token;
-          sessionUser.refresh_token = cached.refresh_token;
         }
+        delete (sessionUser as Partial<MyUser>).refresh_token;
 
         session.user = sessionUser;
       }
