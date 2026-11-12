@@ -17,7 +17,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@auth/core": "^0.30.0",
+    "@auth/core": "0.41.3",
     "@formatjs/intl-localematcher": "^0.5.4",
     "@repo/ayasofyazilim-ui": "workspace:*",
     "@repo/core-saas": "workspace:*",
@@ -26,8 +26,8 @@
     "@workspace/typescript-config": "workspace:*",
     "ioredis": "^5.11.1",
     "negotiator": "0.6.3",
-    "next": "^16.2.10",
-    "next-auth": "5.0.0-beta.25",
+    "next": "^16.4.6",
+    "next-auth": "5.0.0-beta.32",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "sonner": "^2.0.7"

@@ -265,7 +265,8 @@ const result = NextAuth({
     },
     async jwt({ token, trigger, user }) {
       if (user) {
-        token.user = user;
+        // Both providers return getUserData() output, a MyUser.
+        token.user = user as MyUser;
       }
       // An update request's body comes from the browser, so nothing in it is
       // trusted: `session.info` could carry another user's `sub` (whose tokens
@@ -290,7 +291,7 @@ const result = NextAuth({
       // Strip ALL tokens from the cookie - they live in the server-side cache only.
       // This reduces the cookie from ~9KB to ~1-2KB, preventing HTTP 431 errors.
       if (token.user) {
-        const u = token.user as Record<string, unknown>;
+        const u = token.user as unknown as Record<string, unknown>;
         delete u.access_token;
         delete u.refresh_token;
         delete u.expiration_date;
