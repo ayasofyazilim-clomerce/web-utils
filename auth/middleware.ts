@@ -59,6 +59,8 @@ function isUserAuthorized(request: NextAuthRequest) {
   return Boolean(user?.userName || user?.email);
 }
 
+// next-auth types auth(handler) as a route handler; at runtime it also wraps
+// a proxy, so the cast at the end does not change behaviour.
 export const middleware: NextProxy = auth((request: NextAuthRequest) => {
   if (request.headers.has("next-action")) {
     return NextResponse.next();
@@ -148,7 +150,7 @@ export const middleware: NextProxy = auth((request: NextAuthRequest) => {
   }
 
   return NextResponse.next();
-}) as NextProxy;
+}) as unknown as NextProxy;
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
