@@ -141,6 +141,8 @@ export const middleware: NextProxy = auth((request: NextAuthRequest) => {
       );
       const newUrl = request.nextUrl.clone();
       newUrl.pathname = `/${locale}/${loginRoute}`;
+      // The target's own query string is already inside redirectTo.
+      newUrl.search = "";
       // searchParams.set encodes the value once, and searchParams.get on the
       // login page returns the plain path. Encoding it here as well gave
       // `redirectTo=%252Fen%252F…` and made every reader decode twice.
