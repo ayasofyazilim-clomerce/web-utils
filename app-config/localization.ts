@@ -15,6 +15,37 @@ export interface Localization {
   lang: string;
 }
 
+/**
+ * Formats a date for `localization`: the reader's date locale, in `timeZone`
+ * when given (the tenant's with `localization.timeZone`, `"UTC"`, …) or the
+ * runtime's own. Same contract as `formatToLocalizedDate` in the UI library's
+ * `custom/date-tooltip`; it lives here so web-utils needs no UI dependency.
+ */
+export function formatToLocalizedDate({
+  localization,
+  date,
+  dateOptions = {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  },
+  timeZone,
+}: {
+  localization: Pick<Localization, "dateLocale" | "lang">;
+  date: string | Date;
+  dateOptions?: Intl.DateTimeFormatOptions;
+  timeZone?: string;
+}): string {
+  const value = typeof date === "string" ? new Date(date) : date;
+  return value.toLocaleDateString(localization.dateLocale || localization.lang, {
+    ...dateOptions,
+    timeZone,
+  });
+}
+
 const countryToLocale = {
   GB: "en-GB",
   US: "en-US",
