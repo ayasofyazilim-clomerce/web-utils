@@ -1,6 +1,5 @@
 "use client";
 
-import { formatToLocalizedDate } from "@repo/ayasofyazilim-ui/custom/date-tooltip";
 import {
   createContext,
   useContext,
@@ -10,6 +9,7 @@ import {
 } from "react";
 import {
   EMPTY_APPLICATION_CONFIGURATION,
+  formatToLocalizedDate,
   resolveLocalization,
   type ApplicationConfiguration,
   type Localization,
